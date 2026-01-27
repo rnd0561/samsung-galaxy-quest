@@ -1184,12 +1184,18 @@
 
     // ===== МОДАЛКИ =====
     function showModal(html) {
+        // Останавливаем игру при показе модалки
+        stopGame();
         document.getElementById('modalContent').innerHTML = html;
         document.getElementById('modalBg').classList.add('active');
     }
 
     function closeModal() {
         document.getElementById('modalBg').classList.remove('active');
+        // Возобновляем игру если мы на игровом экране
+        if (!document.getElementById('gameScreen').classList.contains('hidden')) {
+            G.gameLoop = requestAnimationFrame(gameLoop);
+        }
     }
 
     // ===== УПРАВЛЕНИЕ =====
