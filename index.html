@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Galaxy Quest - Samsung Training</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #0f2847 100%);
+            color: white;
+        }
+
+        /* ===== ГЛАВНОЕ МЕНЮ ===== */
+        .screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+        }
+
+        .logo {
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: 800;
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7, #f107a3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: #888;
+            text-align: center;
+            max-width: 500px;
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 0.4rem;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            min-width: 200px;
+        }
+
+        .btn.primary {
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn.primary:hover, .btn.primary:active {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 12px 35px rgba(0, 212, 255, 0.4);
+        }
+
+        .btn.secondary {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .btn.secondary:hover, .btn.secondary:active {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+            min-width: 100px;
+        }
+
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .stat-lbl {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        /* ===== ВЫБОР УРОВНЯ ===== */
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 1rem;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .level-card {
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .level-card:hover, .level-card:active {
+            background: rgba(0,212,255,0.1);
+            border-color: rgba(0,212,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .level-card.completed {
+            border-color: rgba(0,255,100,0.3);
+        }
+
+        .level-card.locked {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .level-icon {
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,212,255,0.1);
+            border-radius: 12px;
+        }
+
+        .level-info {
+            flex: 1;
+        }
+
+        .level-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .level-status {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .level-stars {
+            display: flex;
+            gap: 2px;
+        }
+
+        .level-stars span {
+            color: #555;
+        }
+
+        .level-stars span.earned {
+            color: #ffd700;
+        }
+
+        /* ===== ИГРОВОЙ ЭКРАН ===== */
+        .game-screen {
+            background: linear-gradient(180deg, #0a1628 0%, #162040 100%);
+        }
+
+        /* HUD */
+        .hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+            z-index: 50;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .hud-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .level-badge {
+            background: linear-gradient(90deg, #00d4ff, #7b2ff7);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        .device-name {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            font-weight: 600;
+        }
+
+        .stars-hud {
+            display: flex;
+            gap: 4px;
+        }
+
+        .star-hud {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            transition: all 0.4s ease;
+        }
+
+        .star-hud.collected {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            animation: starCollect 0.5s ease;
+        }
+
+        @keyframes starCollect {
+            0% { transform: scale(0) rotate(-180deg); }
+            50% { transform: scale(1.3) rotate(0); }
+            100% { transform: scale(1) rotate(0); }
+        }
+
+        .hud-btn {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        /* Игровая область */
+        .game-area {
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 180px;
+            overflow: hidden;
+        }
+
+        /* Комната */
+        .room {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+        }
+
+        .floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(180deg, #2a2a4a 0%, #1a1a3a 100%);
+            border-top: 3px solid #4a4a7a;
+        }
+
+        .floor::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, rgba(0,212,255,0.4), transparent);
+        }
+
+        /* Персонаж Samsung */
+        .player {
+            position: absolute;
+            bottom: 60px;
+            width: 50px;
+            height: 85px;
+            z-index: 20;
+            transition: left 0.08s linear;
+        }
+
+        .player-sprite {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Голова */
+        .p-head {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(180deg, #ffdbac 0%, #f5c99d 100%);
+            border-radius: 50%;
+            border: 2px solid #e8b88a;
+        }
+
+        .p-hair {
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 16px;
+            background: #2a1a0a;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .p-eyes {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 7px;
+        }
+
+        .p-eye {
+            width: 4px;
+            height: 4px;
+            background: #222;
+            border-radius: 50%;
+        }
+
+        .p-smile {
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 4px;
+            border: 2px solid #c97a6a;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* Тело - футболка Samsung */
+        .p-body {
+            position: absolute;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 38px;
+            height: 35px;
+            background: linear-gradient(180deg, #1428a0 0%, #0d1b6f 100%);
+            border-radius: 4px 4px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5px;
+            font-weight: bold;
+            color: white;
+            letter-spacing: 0.3px;
+        }
+
+        /* Руки */
+        .p-arm {
+            position: absolute;
+            top: 30px;
+            width: 10px;
+            height: 30px;
+            background: linear-gradient(180deg, #1428a0 0%, #0d1b6f 50%, #ffdbac 50%);
+            border-radius: 5px;
+        }
+
+        .p-arm.left { left: 0; transform: rotate(-8deg); }
+        .p-arm.right { right: 0; transform: rotate(8deg); }
+
+        /* Ноги */
+        .p-legs {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 4px;
+        }
+
+        .p-leg {
+            width: 12px;
+            height: 25px;
+            background: linear-gradient(180deg, #2a3a5a 0%, #1a2a4a 70%, #333 70%);
+            border-radius: 4px;
+        }
+
+        /* Анимация ходьбы */
+        .player.walk .p-arm.left { animation: armL 0.25s ease-in-out infinite alternate; }
+        .player.walk .p-arm.right { animation: armR 0.25s ease-in-out infinite alternate; }
+        .player.walk .p-leg:first-child { animation: legL 0.25s ease-in-out infinite alternate; }
+        .player.walk .p-leg:last-child { animation: legR 0.25s ease-in-out infinite alternate; }
+
+        @keyframes armL { from { transform: rotate(-8deg); } to { transform: rotate(15deg); } }
+        @keyframes armR { from { transform: rotate(8deg); } to { transform: rotate(-15deg); } }
+        @keyframes legL { from { transform: rotate(-8deg); } to { transform: rotate(8deg); } }
+        @keyframes legR { from { transform: rotate(8deg); } to { transform: rotate(-8deg); } }
+
+        /* Кристаллы */
+        .crystal {
+            position: absolute;
+            bottom: 100px;
+            width: 45px;
+            height: 55px;
+            cursor: pointer;
+            z-index: 15;
+            transition: transform 0.2s;
+        }
+
+        .crystal:active { transform: scale(1.15); }
+        .crystal.collected { display: none; }
+
+        .crystal-gem {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #00d4ff 0%, #7b2ff7 50%, #f107a3 100%);
+            clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 20% 100%, 0% 35%);
+            animation: float 2s ease-in-out infinite, glow 1.5s ease-in-out infinite alternate;
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.5);
+        }
+
+        .crystal-num {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        @keyframes glow {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.3); }
+        }
+
+        /* Информационная зона */
+        .info-zone {
+            position: absolute;
+            bottom: 60px;
+            left: 30px;
+            width: 100px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .info-screen {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(180deg, #2a3a5a 0%, #1a2a4a 100%);
+            border-radius: 10px;
+            border: 3px solid #3a4a6a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+        }
+
+        .info-icon {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .info-label {
+            font-size: 0.7rem;
+            color: #00d4ff;
+            text-align: center;
+        }
+
+        .info-base {
+            width: 50px;
+            height: 30px;
+            background: #3a4a6a;
+            margin: 0 auto;
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* Дверь */
+        .exit-door {
+            position: absolute;
+            bottom: 60px;
+            right: 30px;
+            width: 70px;
+            height: 130px;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .door-frame {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #4a3a2a 0%, #3a2a1a 100%);
+            border-radius: 8px 8px 0 0;
+            border: 3px solid #5a4a3a;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .door-inner {
+            position: absolute;
+            inset: 4px;
+            background: linear-gradient(180deg, rgba(0,212,255,0.05) 0%, rgba(123,47,247,0.1) 100%);
+            border-radius: 4px 4px 0 0;
+        }
+
+        .door-handle {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            width: 8px;
+            height: 16px;
+            background: #ffd700;
+            border-radius: 3px;
+        }
+
+        .door-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: #888;
+            white-space: nowrap;
+        }
+
+        .exit-door.locked { opacity: 0.6; }
+
+        .exit-door.unlocked .door-inner {
+            background: linear-gradient(180deg, rgba(0,255,100,0.2) 0%, rgba(0,212,255,0.3) 100%);
+            animation: doorGlow 1s ease-in-out infinite;
+        }
+
+        @keyframes doorGlow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Подсказка */
+        .hint {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #00d4ff;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 30;
+            pointer-events: none;
+        }
+
+        .hint.visible {
+            opacity: 1;
+        }
+
+        /* Управление */
+        .controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 180px;
+            background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.8) 30%);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 20px;
+            z-index: 40;
+        }
+
+        .ctrl-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .ctrl-btn {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.25);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            transition: all 0.15s;
+        }
+
+        .ctrl-btn:active {
+            transform: scale(0.9);
+            background: rgba(0,212,255,0.3);
+            border-color: #00d4ff;
+        }
+
+        .ctrl-btn.action {
+            background: linear-gradient(135deg, rgba(0,212,255,0.4), rgba(123,47,247,0.4));
+            border-color: #00d4ff;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        /* ===== МОДАЛЬНЫЕ ОКНА ===== */
+        .modal-bg {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 20px;
+            backdrop-filter: blur(8px);
+        }
+
+        .modal-bg.active {
+            display: flex;
+        }
+
+        .modal {
+            background: linear-gradient(180deg, #2a2a4a 0%, #1a1a3a 100%);
+            border-radius: 20px;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 2px solid rgba(0,212,255,0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: #00d4ff;
+            text-align: center;
+        }
+
+        .modal-text {
+            margin-bottom: 1rem;
+            line-height: 1.7;
+            color: #ccc;
+        }
+
+        .feature-box {
+            background: rgba(0,212,255,0.08);
+            border: 1px solid rgba(0,212,255,0.2);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 0.4rem;
+            font-size: 1rem;
+        }
+
+        .feature-desc {
+            color: #999;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .spec-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .spec-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        .spec-list li:last-child {
+            border-bottom: none;
+        }
+
+        .spec-label {
+            color: #888;
+        }
+
+        .spec-val {
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .quiz-opt {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            margin: 8px 0;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .quiz-opt:hover, .quiz-opt:active {
+            background: rgba(0,212,255,0.1);
+            border-color: rgba(0,212,255,0.4);
+        }
+
+        .quiz-opt.selected {
+            background: rgba(0,212,255,0.15);
+            border-color: #00d4ff;
+        }
+
+        .quiz-opt.correct {
+            background: rgba(0,255,100,0.15);
+            border-color: #00ff64;
+        }
+
+        .quiz-opt.wrong {
+            background: rgba(255,50,50,0.15);
+            border-color: #ff3232;
+        }
+
+        .modal-btns {
+            display: flex;
+            gap: 10px;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* ===== ПОБЕДНЫЙ ЭКРАН ===== */
+        .victory-screen {
+            background: rgba(0,0,0,0.95);
+        }
+
+        .victory-title {
+            font-size: clamp(2rem, 8vw, 3rem);
+            background: linear-gradient(90deg, #ffd700, #ffaa00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .victory-text {
+            text-align: center;
+            color: #ccc;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confettiFall 3s ease-in-out forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* ===== АДАПТИВНОСТЬ ===== */
+        @media (max-width: 600px) {
+            .ctrl-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 1.5rem;
+            }
+            
+            .controls {
+                height: 150px;
+                padding: 15px;
+            }
+            
+            .game-area {
+                bottom: 150px;
+            }
+            
+            .crystal {
+                width: 40px;
+                height: 50px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .controls {
+                justify-content: center;
+                gap: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== ГЛАВНОЕ МЕНЮ ===== -->
+    <div class="screen" id="menuScreen">
+        <div class="logo">Galaxy Quest</div>
+        <p class="subtitle">
+            Собирай кристаллы знаний, изучай 3 главные фишки каждого устройства Samsung Galaxy и проходи тесты!
+        </p>
+        <button class="btn primary" onclick="startGame()">Начать игру</button>
+        <button class="btn secondary" onclick="showLevels()">Выбрать уровень</button>
+        
+        <div class="stats-row">
+            <div class="stat">
+                <div class="stat-val" id="statDone">0</div>
+                <div class="stat-lbl">Пройдено</div>
+            </div>
+            <div class="stat">
+                <div class="stat-val" id="statTotal">23</div>
+                <div class="stat-lbl">Всего</div>
+            </div>
+            <div class="stat">
+                <div class="stat-val" id="statStars">0</div>
+                <div class="stat-lbl">Звёзд</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ВЫБОР УРОВНЯ ===== -->
+    <div class="screen hidden" id="levelsScreen">
+        <div class="logo" style="font-size:2rem;margin-bottom:1rem;">Выбор уровня</div>
+        <div class="levels-grid" id="levelsGrid"></div>
+        <button class="btn secondary" onclick="showMenu()" style="margin-top:1rem;">Назад</button>
+    </div>
+
+    <!-- ===== ИГРОВОЙ ЭКРАН ===== -->
+    <div class="screen game-screen hidden" id="gameScreen">
+        <div class="hud">
+            <div class="hud-left">
+                <div class="level-badge">Ур. <span id="lvlNum">1</span></div>
+                <div class="device-name" id="devName">Galaxy A56</div>
+                <div class="stars-hud">
+                    <div class="star-hud" id="s1">★</div>
+                    <div class="star-hud" id="s2">★</div>
+                    <div class="star-hud" id="s3">★</div>
+                </div>
+            </div>
+            <button class="hud-btn" onclick="showMenu()">Меню</button>
+        </div>
+
+        <div class="game-area">
+            <div class="room" id="room">
+                <div class="floor"></div>
+
+                <!-- Персонаж -->
+                <div class="player" id="player">
+                    <div class="player-sprite">
+                        <div class="p-hair"></div>
+                        <div class="p-head">
+                            <div class="p-eyes"><div class="p-eye"></div><div class="p-eye"></div></div>
+                            <div class="p-smile"></div>
+                        </div>
+                        <div class="p-arm left"></div>
+                        <div class="p-arm right"></div>
+                        <div class="p-body">SAMSUNG</div>
+                        <div class="p-legs"><div class="p-leg"></div><div class="p-leg"></div></div>
+                    </div>
+                </div>
+
+                <!-- Кристаллы -->
+                <div class="crystal" id="c1"><div class="crystal-gem"></div><div class="crystal-num">1</div></div>
+                <div class="crystal" id="c2"><div class="crystal-gem"></div><div class="crystal-num">2</div></div>
+                <div class="crystal" id="c3"><div class="crystal-gem"></div><div class="crystal-num">3</div></div>
+
+                <!-- Инфозона -->
+                <div class="info-zone" id="infoZone">
+                    <div class="info-screen">
+                        <div class="info-icon">📖</div>
+                        <div class="info-label">Материалы</div>
+                    </div>
+                    <div class="info-base"></div>
+                </div>
+
+                <!-- Дверь -->
+                <div class="exit-door locked" id="exitDoor">
+                    <div class="door-frame">
+                        <div class="door-inner"></div>
+                        <div class="door-handle"></div>
+                    </div>
+                    <div class="door-label" id="doorLabel">🔒 Собери кристаллы</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hint" id="hint">Нажми для взаимодействия</div>
+
+        <div class="controls">
+            <div class="ctrl-group">
+                <button class="ctrl-btn" id="btnL">◀</button>
+                <button class="ctrl-btn" id="btnR">▶</button>
+            </div>
+            <div class="ctrl-group">
+                <button class="ctrl-btn action" id="btnA">E</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО ===== -->
+    <div class="modal-bg" id="modalBg">
+        <div class="modal" id="modalContent"></div>
+    </div>
+
+    <!-- ===== ПОБЕДА ===== -->
+    <div class="screen victory-screen hidden" id="victoryScreen">
+        <div class="victory-title" id="vicTitle">🎉 Уровень пройден!</div>
+        <p class="victory-text" id="vicText">Вы отлично запомнили все 3 фишки!</p>
+        <button class="btn primary" onclick="nextLevel()">Следующий уровень</button>
+        <button class="btn secondary" onclick="showMenu()">В меню</button>
+    </div>
+
+    <script>
+    // ===== ДАННЫЕ УСТРОЙСТВ =====
+    const DEVICES = [
+        {
+            id: 1, name: "Galaxy A56", cat: "phone", color: "#4CAF50",
+            features: ["Сила интеллекта", "Совершенство в каждом кадре", "Крутая производительность"],
+            details: ["Функция «Обвести и найти», AI рекомендации, создание фотофильтров", "50 МП камера с OIS, HDR-съёмка, портретная съёмка с AI", "Зарядка 45 Вт, 4 нм процессор, продвинутое охлаждение"],
+            specs: { "Экран": "6.7\" FHD+ AMOLED 120 Гц", "Батарея": "5,000 мАч", "Память": "8/128-256 ГБ", "Процессор": "Exynos 1580", "Защита": "IP67" }
+        },
+        {
+            id: 2, name: "Galaxy S25 Ultra", cat: "phone", color: "#3F51B5",
+            features: ["Решай задачи по-новому", "Играй по-новому", "Создавай контент по-новому"],
+            details: ["Мультимодальный AI поиск, голосовой помощник, статус-виджет", "3 нм суперпроцессор, сверхскоростная AI обработка", "Реалистичные портреты, плавный AI зум, ассистент по видео"],
+            specs: { "Экран": "6.9\" QHD+ AMOLED 1-120 Гц", "Батарея": "5,000 мАч", "Память": "12/256 ГБ - 1 ТБ", "Процессор": "Snapdragon 8 Elite (3 нм)", "Камера": "200 МП", "Защита": "IP68" }
+        },
+        {
+            id: 3, name: "Galaxy S25", cat: "phone", color: "#2196F3",
+            features: ["Решай задачи по-новому", "Играй по-новому", "Создавай контент по-новому"],
+            details: ["Интуитивный AI поиск, мгновенное выполнение задач", "Первый 3 нм процессор в линейке Galaxy S", "Чёткие портреты, плавность зума, ассистент по видео"],
+            specs: { "Экран": "6.2\" FHD+ AMOLED 1-120 Гц", "Батарея": "4,000 мАч", "Память": "12/128-512 ГБ", "Процессор": "Snapdragon 8 Elite (3 нм)", "Защита": "IP68" }
+        },
+        {
+            id: 4, name: "Galaxy S25+", cat: "phone", color: "#00BCD4",
+            features: ["Решай задачи по-новому", "Играй по-новому", "Создавай контент по-новому"],
+            details: ["Интуитивный AI поиск, мгновенное выполнение задач", "Первый 3 нм суперпроцессор Galaxy S", "Чёткие портреты, плавность зума с AI"],
+            specs: { "Экран": "6.7\" QHD+ AMOLED 1-120 Гц", "Батарея": "4,900 мАч", "Память": "12/256-512 ГБ", "Процессор": "Snapdragon 8 Elite (3 нм)", "Защита": "IP68" }
+        },
+        {
+            id: 5, name: "Galaxy S25 FE", cat: "phone", color: "#3F51B5",
+            features: ["Дизайн", "AI функции", "Производительность"],
+            details: ["Тонкий и лёгкий, матовый, флагманский дизайн", "Обвести и найти, Gemini Live, Мой день, ассистенты", "Мощный процессор, 4900 мАч, минимальные рамки"],
+            specs: { "Экран": "6.7\" AMOLED FHD+ 60-120 Гц", "Батарея": "4,900 мАч", "Память": "8/256-512 ГБ", "Процессор": "Exynos 2400 (4 нм)", "Защита": "IP68" }
+        },
+        {
+            id: 6, name: "Galaxy A36", cat: "phone", color: "#7C4DFF",
+            features: ["Сила интеллекта", "Совершенство в каждом кадре", "Крутая производительность"],
+            details: ["«Обвести и найти», AI рекомендации, фотофильтры с AI", "50 МП камера с OIS, видео 10-бит HDR", "Зарядка 45 Вт, 4 нм процессор, охлаждение"],
+            specs: { "Экран": "6.7\" FHD+ AMOLED 120 Гц", "Батарея": "5,000 мАч", "Память": "8/128-256 ГБ", "Процессор": "Snapdragon 6 Gen3 (4 нм)", "Защита": "IP67" }
+        },
+        {
+            id: 7, name: "Galaxy A26", cat: "phone", color: "#4CAF50",
+            features: ["Сила интеллекта", "Совершенство в каждом кадре", "Крутая производительность и надежность"],
+            details: ["«Обвести и найти», AI рекомендации, фотофильтры", "50 МП камера с OIS, точный автофокус", "5 нм процессор, IP67, 6 поколений обновлений ОС"],
+            specs: { "Экран": "6.7\" FHD+ AMOLED 120 Гц", "Батарея": "5,000 мАч", "Память": "6-8/128-256 ГБ", "Процессор": "Exynos 1380 (5 нм)", "Защита": "IP67" }
+        },
+        {
+            id: 8, name: "Galaxy A17", cat: "phone", color: "#607D8B",
+            features: ["Возможности AI", "Крутая камера", "Крутой дизайн"],
+            details: ["Gemini, Gemini Live, поиск музыки, «Обвести и найти»", "50 МП с OIS, ±1.5° стабилизация, x2.5 ярче фото", "Линейный блок камер, стекло из полимера, 190 г"],
+            specs: { "Экран": "6.7\" FHD+ AMOLED 90 Гц", "Батарея": "5,000 мАч", "Память": "4-8/128-256 ГБ", "Процессор": "Helio G99 (6 нм)", "Защита": "IP54" }
+        },
+        {
+            id: 9, name: "Galaxy A07", cat: "phone", color: "#9C27B0",
+            features: ["Надежность и безопасность", "Крутой экран", "Крутая производительность"],
+            details: ["6 поколений обновлений ОС, IP54, Samsung Knox Vault", "6.7 дюймов и 90 Гц", "Helio G99, 6 нм, до 2.2 ГГц"],
+            specs: { "Экран": "6.7\" HD+ LCD 90 Гц", "Батарея": "5,000 мАч", "Память": "4-6/64-128 ГБ", "Процессор": "Helio G99 (6 нм)", "Защита": "IP54" }
+        },
+        {
+            id: 10, name: "Galaxy Z Fold7", cat: "fold", color: "#1565C0",
+            features: ["Самый тонкий и лёгкий Fold", "Камера 200 МП", "Новый уровень взаимодействия с Gemini"],
+            details: ["8.9 мм сложенный, 4.2 мм разложенный, на 26% тоньше", "200 МП как в S25 Ultra вместо 50 МП в Z Fold6", "Gemini Live с камерой и демонстрацией экрана"],
+            specs: { "Экран": "8.0\" / 6.5\" AMOLED 1-120 Гц", "Батарея": "4,400 мАч", "Память": "12-16/256 ГБ - 1 ТБ", "Процессор": "Snapdragon 8 Elite (3 нм)", "Защита": "IP48" }
+        },
+        {
+            id: 11, name: "Galaxy Z Flip7", cat: "fold", color: "#0D47A1",
+            features: ["Безграничный Flex экран", "Общение с Gemini Live", "Улучшенная автономность"],
+            details: ["На 60% ярче, в 2 раза плавнее, на 70% тоньше рамка", "Gemini Live с камерой и демонстрацией экрана", "До 31 часа просмотра видео, 4300 мАч"],
+            specs: { "Экран": "6.9\" / 4.1\" AMOLED 1-120 Гц", "Батарея": "4,300 мАч", "Память": "12/256-512 ГБ", "Процессор": "Exynos 2500 (3 нм)", "Защита": "IP48" }
+        },
+        {
+            id: 12, name: "Galaxy Z Flip7 FE", cat: "fold", color: "#E8EAF6",
+            features: ["Общение с Gemini Live", "Камера как в Z Flip7", "ProVisual Engine"],
+            details: ["Gemini Live с камерой и доступом к экрану", "50 МП широкоугольная, 12 МП ультраширокая", "Распознаёт мельчайшие детали для чётких фото"],
+            specs: { "Экран": "6.7\" / 3.4\" AMOLED 1-120 Гц", "Батарея": "4,000 мАч", "Память": "8/128-256 ГБ", "Процессор": "Exynos 2400 (4 нм)", "Защита": "IP48" }
+        },
+        {
+            id: 13, name: "Galaxy Buds3 FE", cat: "audio", color: "#263238",
+            features: ["Мощный звук и активное шумоподавление", "Широкие возможности с Galaxy AI", "Надёжность IP54"],
+            details: ["Шумоподавление как в Buds3 Pro, 11 мм динамик, эквалайзер", "Быстрый доступ к Gemini, перевод в реальном времени", "Защита от пыли и брызг воды IP54"],
+            specs: { "Время работы": "до 24ч/30ч", "Вес футляра": "41.8 г", "Вес наушника": "5 г", "Bluetooth": "5.4" }
+        },
+        {
+            id: 14, name: "Galaxy Buds Core", cat: "audio", color: "#ECEFF1",
+            features: ["Отличный звук и активное шумоподавление", "Повышенный комфорт и надёжная посадка", "Защита от пыли и влаги"],
+            details: ["Система из 3 микрофонов, мощное шумоподавление", "Специальные ушные держатели для надёжной посадки", "IP54 — устойчивы к пыли и брызгам воды"],
+            specs: { "Время работы": "до 20ч/35ч", "Вес футляра": "31.2 г", "Вес наушника": "5.3 г", "Bluetooth": "5.4" }
+        },
+        {
+            id: 15, name: "Galaxy Watch 8", cat: "watch", color: "#37474F",
+            features: ["Забота о здоровье", "Утонченность и удобство", "Простое управление любимыми сервисами"],
+            details: ["Личный тренер по бегу, мониторинг сердца, рекомендации по сну", "На 11% тоньше Watch7, смена ремешка в один клик", "Яндекс.Музыка, Gemini на запястье"],
+            specs: { "Экран": "1.47\"/1.34\" 3000 нит", "Батарея": "435/325 мАч", "Память": "2/32 ГБ", "Процессор": "Exynos W1000 (3 нм)", "Защита": "5ATM IP68" }
+        },
+        {
+            id: 16, name: "Galaxy Watch 8 Classic", cat: "watch", color: "#263238",
+            features: ["Забота о здоровье", "Классика и эргономичность", "Простое управление любимыми сервисами"],
+            details: ["Личный тренер, мониторинг сердца, рекомендации по сну", "Вращающийся безель, удобная кнопка быстрого доступа", "Яндекс.Музыка, Gemini на запястье"],
+            specs: { "Экран": "1.34\" 3000 нит", "Батарея": "445 мАч", "Память": "2/64 ГБ", "Процессор": "Exynos W1000 (3 нм)", "Материал": "Нержавеющая сталь", "Защита": "5ATM IP68" }
+        },
+        {
+            id: 17, name: "Galaxy Tab S11 Ultra", cat: "tablet", color: "#FF7043",
+            features: ["Новый уровень творчества и производительности", "Galaxy AI на большом экране", "Тонкий, лёгкий и яркий"],
+            details: ["Следующее поколение S Pen, стикеры, обновлённый Dex", "Зажмите боковую клавишу для AI", "5.1 мм толщина, 692 г, 1600 нит"],
+            specs: { "Экран": "14.6\" WQXGA+ AMOLED 120 Гц", "Батарея": "11,600 мАч", "Память": "12-16/256 ГБ - 1 ТБ", "Процессор": "Dimensity 9400+ (3 нм)", "Защита": "IP68" }
+        },
+        {
+            id: 18, name: "Galaxy Tab S11", cat: "tablet", color: "#78909C",
+            features: ["Новый уровень творчества и производительности", "Galaxy AI на большом экране", "Тонкий, лёгкий и яркий"],
+            details: ["Следующее поколение S Pen, стикеры, обновлённый Dex", "Зажмите боковую клавишу для AI", "5.5 мм толщина, 469 г, 1600 нит"],
+            specs: { "Экран": "11\" WQXGA AMOLED 120 Гц", "Батарея": "8,400 мАч", "Память": "12/128-512 ГБ", "Процессор": "Dimensity 9400+ (3 нм)", "Защита": "IP68" }
+        },
+        {
+            id: 19, name: "Tab S10 FE", cat: "tablet", color: "#4DD0E1",
+            features: ["Захватывающие развлечения", "Сила интеллекта и творчества", "Новый опыт взаимодействия"],
+            details: ["Exynos 1580, 13 МП камера, 90 Гц с Vision Booster", "«Обвести и найти», S Pen, решение математики", "eSIM поддержка, быстрый перенос файлов, Smart View"],
+            specs: { "Экран": "10.9\" LCD 90 Гц", "Батарея": "8,000 мАч", "Память": "8-12/128-256 ГБ", "Процессор": "Exynos 1580", "Защита": "IP68" }
+        },
+        {
+            id: 20, name: "Tab S10 FE+", cat: "tablet", color: "#B39DDB",
+            features: ["Захватывающие развлечения", "Сила интеллекта и творчества", "Новый опыт взаимодействия"],
+            details: ["Exynos 1580, 13 МП камера, 90 Гц с Vision Booster", "«Обвести и найти», S Pen, решение математики", "eSIM поддержка, Smart View"],
+            specs: { "Экран": "13.1\" LCD 90 Гц", "Батарея": "10,090 мАч", "Память": "8-12/128-256 ГБ", "Процессор": "Exynos 1580", "Защита": "IP68" }
+        },
+        {
+            id: 21, name: "Galaxy Tab S10 Lite", cat: "tablet", color: "#FFAB91",
+            features: ["Продвинутые интеллектуальные фишки", "Увеличенная диагональ и плавное изображение", "Быстрая зарядка и улучшенная автономность"],
+            details: ["Gemini, решение математики, «Обвести и найти» с S Pen", "10.9 дюймов, 90 Гц, плавное изображение", "8,000 мАч, до 16 ч работы, 25 Вт за 120 мин"],
+            specs: { "Экран": "10.9\" WUXGA+ TFT 90 Гц", "Батарея": "8,000 мАч", "Память": "6-8/128-256 ГБ", "Процессор": "Exynos 1380 (5 нм)", "Защита": "IP42" }
+        },
+        {
+            id: 22, name: "Galaxy Tab A11+", cat: "tablet", color: "#26A69A",
+            features: ["Интеллектуальные функции", "Расширенная поддержка Galaxy", "Фирменный дизайн Galaxy"],
+            details: ["«Обвести и найти», Gemini по длительному нажатию", "7 поколений обновления ОС, 7 лет обновлений безопасности", "Обновлённый дизайн камеры, динамик как в S-серии"],
+            specs: { "Экран": "11\" TFT PLS 90 Гц", "Батарея": "7,040 мАч", "Память": "6-8/128-256 ГБ", "Процессор": "Dimensity 7300 (4 нм)", "Защита": "IP52" }
+        },
+        {
+            id: 23, name: "Galaxy Tab A11", cat: "tablet", color: "#80CBC4",
+            features: ["Безупречный просмотр", "Расширенная поддержка Galaxy", "Фирменный дизайн Galaxy"],
+            details: ["90 Гц экран для плавного изображения", "7 поколений обновления ОС, 7 лет обновлений безопасности", "Обновлённый дизайн камеры, динамик как в S-серии"],
+            specs: { "Экран": "8.7\" TFT PLS 90 Гц", "Батарея": "5,100 мАч", "Память": "4-8/64-128 ГБ", "Процессор": "Helio G99 (6 нм)", "Защита": "IP52" }
+        }
+    ];
+
+    // ===== СОСТОЯНИЕ ИГРЫ =====
+    const G = {
+        level: 0,
+        px: 100,
+        collected: [false, false, false],
+        unlocked: false,
+        completed: [],
+        stars: 0,
+        moving: null
+    };
+
+    // ===== DOM =====
+    const $ = id => document.getElementById(id);
+    const player = $('player');
+    const crystals = [$('c1'), $('c2'), $('c3')];
+    const starHud = [$('s1'), $('s2'), $('s3')];
+    const hint = $('hint');
+    const door = $('exitDoor');
+    const room = $('room');
+
+    // ===== ЗАГРУЗКА/СОХРАНЕНИЕ =====
+    function load() {
+        try {
+            const d = JSON.parse(localStorage.getItem('gq') || '{}');
+            G.completed = d.completed || [];
+            G.stars = d.stars || 0;
+            G.level = d.level || 0;
+        } catch(e) {}
+        updateStats();
+    }
+
+    function save() {
+        localStorage.setItem('gq', JSON.stringify({
+            completed: G.completed,
+            stars: G.stars,
+            level: G.level
+        }));
+    }
+
+    function updateStats() {
+        $('statDone').textContent = G.completed.length;
+        $('statTotal').textContent = DEVICES.length;
+        $('statStars').textContent = G.stars;
+    }
+
+    // ===== НАВИГАЦИЯ =====
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+        $(id).classList.remove('hidden');
+    }
+
+    function showMenu() {
+        stopMove();
+        showScreen('menuScreen');
+        updateStats();
+    }
+
+    function showLevels() {
+        const grid = $('levelsGrid');
+        grid.innerHTML = '';
+        
+        DEVICES.forEach((dev, i) => {
+            const done = G.completed.includes(i);
+            const locked = i > 0 && !G.completed.includes(i - 1) && !done;
+            
+            const card = document.createElement('div');
+            card.className = 'level-card' + (done ? ' completed' : '') + (locked ? ' locked' : '');
+            card.innerHTML = `
+                <div class="level-icon">${locked ? '🔒' : done ? '✅' : getCatIcon(dev.cat)}</div>
+                <div class="level-info">
+                    <div class="level-name">${i + 1}. ${dev.name}</div>
+                    <div class="level-status">${locked ? 'Заблокировано' : done ? 'Пройдено' : 'Доступно'}</div>
+                </div>
+                <div class="level-stars">
+                    <span class="${done ? 'earned' : ''}">★</span>
+                    <span class="${done ? 'earned' : ''}">★</span>
+                    <span class="${done ? 'earned' : ''}">★</span>
+                </div>
+            `;
+            
+            if (!locked) {
+                card.onclick = () => {
+                    G.level = i;
+                    startGame();
+                };
+            }
+            
+            grid.appendChild(card);
+        });
+        
+        showScreen('levelsScreen');
+    }
+
+    function getCatIcon(cat) {
+        return { phone: '📱', fold: '📱', tablet: '📱', watch: '⌚', audio: '🎧' }[cat] || '📱';
+    }
+
+    // ===== ИГРА =====
+    function startGame() {
+        showScreen('gameScreen');
+        loadLevel(G.level);
+    }
+
+    function loadLevel(idx) {
+        const dev = DEVICES[idx];
+        if (!dev) { showVictory(true); return; }
+
+        G.collected = [false, false, false];
+        G.unlocked = false;
+        G.px = 100;
+
+        $('lvlNum').textContent = idx + 1;
+        $('devName').textContent = dev.name;
+
+        starHud.forEach(s => s.classList.remove('collected'));
+        crystals.forEach(c => c.classList.remove('collected'));
+        
+        door.classList.add('locked');
+        door.classList.remove('unlocked');
+        $('doorLabel').textContent = '🔒 Собери кристаллы';
+
+        // Расположение кристаллов
+        const w = room.offsetWidth;
+        crystals[0].style.left = (w * 0.25) + 'px';
+        crystals[1].style.left = (w * 0.5) + 'px';
+        crystals[2].style.left = (w * 0.75) + 'px';
+
+        updatePlayer();
+        room.style.background = `linear-gradient(180deg, ${dev.color}15 0%, #162040 100%)`;
+    }
+
+    function updatePlayer() {
+        player.style.left = G.px + 'px';
+    }
+
+    function move(dir) {
+        const speed = 12;
+        const minX = 30;
+        const maxX = room.offsetWidth - 70;
+
+        if (dir === 'left') {
+            G.px = Math.max(minX, G.px - speed);
+            player.style.transform = 'scaleX(-1)';
+        } else {
+            G.px = Math.min(maxX, G.px + speed);
+            player.style.transform = 'scaleX(1)';
+        }
+
+        player.classList.add('walk');
+        updatePlayer();
+        checkNear();
+    }
+
+    function stopMove() {
+        if (G.moving) {
+            clearInterval(G.moving);
+            G.moving = null;
+        }
+        player.classList.remove('walk');
+    }
+
+    function checkNear() {
+        let near = null;
+        let text = '';
+
+        // Кристаллы
+        crystals.forEach((c, i) => {
+            if (G.collected[i]) return;
+            const cx = parseInt(c.style.left) || 0;
+            if (Math.abs(G.px - cx) < 60) {
+                near = () => collectCrystal(i);
+                text = `Фишка ${i + 1}`;
+            }
+        });
+
+        // Инфозона
+        const infoX = 30;
+        if (Math.abs(G.px - infoX) < 80) {
+            near = showMaterials;
+            text = 'Материалы';
+        }
+
+        // Дверь
+        const doorX = room.offsetWidth - 80;
+        if (Math.abs(G.px - doorX) < 70) {
+            if (G.unlocked) {
+                near = showQuiz;
+                text = 'Пройти тест';
+            } else {
+                near = null;
+                text = 'Собери все кристаллы!';
+            }
+        }
+
+        hint.textContent = text;
+        hint.classList.toggle('visible', !!text);
+        
+        window.currentAction = near;
+    }
+
+    function doAction() {
+        if (window.currentAction) {
+            window.currentAction();
+        }
+    }
+
+    // ===== СБОР КРИСТАЛЛА =====
+    function collectCrystal(i) {
+        const dev = DEVICES[G.level];
+        
+        G.collected[i] = true;
+        crystals[i].classList.add('collected');
+        starHud[i].classList.add('collected');
+
+        showModal(`
+            <div class="modal-title">✨ Фишка ${i + 1}</div>
+            <div class="feature-box">
+                <div class="feature-title">${dev.features[i]}</div>
+                <div class="feature-desc">${dev.details[i]}</div>
+            </div>
+            <div class="modal-btns">
+                <button class="btn primary" onclick="closeModal()">Понятно!</button>
+            </div>
+        `);
+
+        if (G.collected.every(c => c)) {
+            G.unlocked = true;
+            door.classList.remove('locked');
+            door.classList.add('unlocked');
+            $('doorLabel').textContent = '✅ Пройди тест!';
+        }
+
+        checkNear();
+    }
+
+    // ===== МАТЕРИАЛЫ =====
+    function showMaterials() {
+        const dev = DEVICES[G.level];
+        
+        let html = `<div class="modal-title">📖 ${dev.name}</div>`;
+        html += `<p class="modal-text"><strong>3 главные фишки:</strong></p>`;
+        
+        dev.features.forEach((f, i) => {
+            const got = G.collected[i];
+            html += `
+                <div class="feature-box" style="opacity:${got ? 1 : 0.5}">
+                    <div class="feature-title">${got ? '✅' : '❓'} ${f}</div>
+                    <div class="feature-desc">${got ? dev.details[i] : 'Собери кристалл...'}</div>
+                </div>
+            `;
+        });
+
+        html += `<p class="modal-text" style="margin-top:1rem"><strong>Характеристики:</strong></p>`;
+        html += `<ul class="spec-list">`;
+        for (const [k, v] of Object.entries(dev.specs)) {
+            html += `<li><span class="spec-label">${k}</span><span class="spec-val">${v}</span></li>`;
+        }
+        html += `</ul>`;
+        html += `<div class="modal-btns"><button class="btn primary" onclick="closeModal()">Закрыть</button></div>`;
+
+        showModal(html);
+    }
+
+    // ===== КВИЗ =====
+    function showQuiz() {
+        const dev = DEVICES[G.level];
+        
+        // Собираем все фишки для выбора
+        const allFeatures = new Set();
+        DEVICES.forEach(d => d.features.forEach(f => allFeatures.add(f)));
+        
+        const correct = dev.features;
+        const wrong = [...allFeatures].filter(f => !correct.includes(f));
+        const shuffledWrong = wrong.sort(() => Math.random() - 0.5).slice(0, 3);
+        const options = [...correct, ...shuffledWrong].sort(() => Math.random() - 0.5);
+
+        let html = `
+            <div class="modal-title">🎯 Тест: ${dev.name}</div>
+            <p class="modal-text">Выбери все 3 главные фишки:</p>
+        `;
+        
+        options.forEach(opt => {
+            html += `<button class="quiz-opt" data-f="${opt}" onclick="toggleOpt(this)">${opt}</button>`;
+        });
+
+        html += `
+            <div class="modal-btns">
+                <button class="btn primary" onclick="checkQuiz()">Проверить</button>
+                <button class="btn secondary" onclick="closeModal()">Отмена</button>
+            </div>
+        `;
+
+        showModal(html);
+    }
+
+    function toggleOpt(btn) {
+        const selected = document.querySelectorAll('.quiz-opt.selected');
+        if (btn.classList.contains('selected')) {
+            btn.classList.remove('selected');
+        } else if (selected.length < 3) {
+            btn.classList.add('selected');
+        }
+    }
+
+    function checkQuiz() {
+        const dev = DEVICES[G.level];
+        const selected = [...document.querySelectorAll('.quiz-opt.selected')].map(b => b.dataset.f);
+        
+        let correct = 0;
+        document.querySelectorAll('.quiz-opt').forEach(btn => {
+            const f = btn.dataset.f;
+            const isCorrect = dev.features.includes(f);
+            const isSelected = selected.includes(f);
+            
+            if (isCorrect) {
+                btn.classList.add('correct');
+                if (isSelected) correct++;
+            } else if (isSelected) {
+                btn.classList.add('wrong');
+            }
+        });
+
+        setTimeout(() => {
+            if (correct === 3) {
+                closeModal();
+                completeLevel();
+            } else {
+                $('modalContent').innerHTML = `
+                    <div class="modal-title">❌ Попробуй ещё!</div>
+                    <p class="modal-text">Правильно: ${correct} из 3<br>Вернись к материалам!</p>
+                    <div class="modal-btns">
+                        <button class="btn primary" onclick="closeModal()">Понятно</button>
+                    </div>
+                `;
+            }
+        }, 1000);
+    }
+
+    // ===== ЗАВЕРШЕНИЕ =====
+    function completeLevel() {
+        if (!G.completed.includes(G.level)) {
+            G.completed.push(G.level);
+            G.stars += 3;
+        }
+        save();
+        showVictory(false);
+    }
+
+    function showVictory(final) {
+        if (final) {
+            $('vicTitle').textContent = '🏆 Поздравляем!';
+            $('vicText').textContent = `Вы изучили все ${DEVICES.length} устройств Samsung Galaxy!`;
+        } else {
+            $('vicTitle').textContent = '🎉 Уровень пройден!';
+            $('vicText').textContent = 'Вы отлично запомнили все 3 фишки!';
+        }
+        
+        showScreen('victoryScreen');
+        createConfetti();
+    }
+
+    function nextLevel() {
+        G.level++;
+        if (G.level >= DEVICES.length) {
+            showVictory(true);
+        } else {
+            startGame();
+        }
+    }
+
+    function createConfetti() {
+        const colors = ['#00d4ff', '#7b2ff7', '#f107a3', '#ffd700', '#00ff64'];
+        const cont = $('victoryScreen');
+        
+        for (let i = 0; i < 40; i++) {
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            c.style.left = Math.random() * 100 + '%';
+            c.style.background = colors[Math.floor(Math.random() * colors.length)];
+            c.style.animationDelay = Math.random() * 2 + 's';
+            cont.appendChild(c);
+            setTimeout(() => c.remove(), 3000);
+        }
+    }
+
+    // ===== МОДАЛКИ =====
+    function showModal(html) {
+        $('modalContent').innerHTML = html;
+        $('modalBg').classList.add('active');
+    }
+
+    function closeModal() {
+        $('modalBg').classList.remove('active');
+        checkNear();
+    }
+
+    // ===== УПРАВЛЕНИЕ =====
+    // Клавиатура
+    document.addEventListener('keydown', e => {
+        if ($('modalBg').classList.contains('active')) return;
+        if ($('gameScreen').classList.contains('hidden')) return;
+        
+        switch(e.key) {
+            case 'ArrowLeft': case 'a': case 'A':
+                if (!G.moving) G.moving = setInterval(() => move('left'), 40);
+                break;
+            case 'ArrowRight': case 'd': case 'D':
+                if (!G.moving) G.moving = setInterval(() => move('right'), 40);
+                break;
+            case 'e': case 'E': case 'Enter': case ' ':
+                doAction();
+                break;
+            case 'Escape':
+                showMenu();
+                break;
+        }
+    });
+
+    document.addEventListener('keyup', e => {
+        if (['ArrowLeft', 'ArrowRight', 'a', 'A', 'd', 'D'].includes(e.key)) {
+            stopMove();
+        }
+    });
+
+    // Кнопки
+    function setupBtn(btn, action) {
+        const start = () => {
+            if (!G.moving) G.moving = setInterval(action, 40);
+        };
+        const stop = () => stopMove();
+        
+        btn.addEventListener('mousedown', start);
+        btn.addEventListener('touchstart', e => { e.preventDefault(); start(); });
+        btn.addEventListener('mouseup', stop);
+        btn.addEventListener('mouseleave', stop);
+        btn.addEventListener('touchend', stop);
+        btn.addEventListener('touchcancel', stop);
+    }
+
+    setupBtn($('btnL'), () => move('left'));
+    setupBtn($('btnR'), () => move('right'));
+    $('btnA').addEventListener('click', doAction);
+    $('btnA').addEventListener('touchstart', e => { e.preventDefault(); doAction(); });
+
+    // Клики на объекты
+    crystals.forEach((c, i) => {
+        c.addEventListener('click', () => {
+            if (!G.collected[i] && Math.abs(G.px - parseInt(c.style.left)) < 100) {
+                collectCrystal(i);
+            }
+        });
+    });
+
+    $('infoZone').addEventListener('click', () => {
+        if (Math.abs(G.px - 30) < 150) showMaterials();
+    });
+
+    $('exitDoor').addEventListener('click', () => {
+        if (G.unlocked && Math.abs(G.px - (room.offsetWidth - 80)) < 150) showQuiz();
+    });
+
+    // ===== INIT =====
+    load();
+    </script>
+</body>
+</html>
