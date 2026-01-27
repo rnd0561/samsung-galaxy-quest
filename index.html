@@ -400,6 +400,103 @@
             color: #fff;
         }
 
+        /* ===== ЭКРАН ТЕСТА ===== */
+        .quiz-screen {
+            background: linear-gradient(180deg, #5c94fc 0%, #3060c0 100%);
+            overflow-y: auto;
+        }
+
+        .quiz-container {
+            max-width: 500px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        .quiz-title {
+            font-size: clamp(1.8rem, 6vw, 2.5rem);
+            font-weight: 900;
+            color: #fbd000;
+            text-shadow: 3px 3px 0 #000;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .quiz-question {
+            font-size: clamp(1rem, 4vw, 1.3rem);
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-option {
+            padding: 15px 20px;
+            background: linear-gradient(180deg, #fbd000 0%, #e5a000 100%);
+            border: 4px solid #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 0 #8a6000;
+            color: #333;
+            font-weight: bold;
+            font-size: clamp(0.9rem, 3.5vw, 1.1rem);
+            cursor: pointer;
+            text-align: left;
+            transition: transform 0.1s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .quiz-option:active {
+            transform: scale(0.98);
+        }
+
+        .quiz-option.selected {
+            background: linear-gradient(180deg, #fff 0%, #ddd 100%);
+            border-color: #fbd000;
+        }
+
+        .quiz-option.correct {
+            background: linear-gradient(180deg, #8bce8b 0%, #5a9a5a 100%);
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .quiz-option.wrong {
+            background: linear-gradient(180deg, #e52521 0%, #a01010 100%);
+            color: #fff;
+            border-color: #fff;
+        }
+
+        .quiz-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .quiz-result {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .quiz-result-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .quiz-result-text {
+            font-size: 1.2rem;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000;
+            margin-bottom: 20px;
+        }
+
         .modal-btns {
             display: flex;
             gap: 10px;
@@ -531,6 +628,18 @@
         <div class="subtitle" id="vicText">Вы изучили все фишки!</div>
         <button class="btn primary" onclick="nextWorld()">ДАЛЬШЕ</button>
         <button class="btn secondary" onclick="showMenu()">МЕНЮ</button>
+    </div>
+
+    <!-- ТЕСТ -->
+    <div class="screen quiz-screen hidden" id="quizScreen">
+        <div class="quiz-container">
+            <div class="quiz-title" id="quizTitle">🏁 ФИНАЛЬНЫЙ ТЕСТ</div>
+            <div class="quiz-question" id="quizQuestion">Выбери 3 главные фишки:</div>
+            <div class="quiz-options" id="quizOptions"></div>
+            <div class="quiz-buttons">
+                <button class="btn primary" onclick="checkQuizAnswer()">ПРОВЕРИТЬ</button>
+            </div>
+        </div>
     </div>
 
     <!-- МОДАЛКА -->
@@ -1069,8 +1178,12 @@
     }
 
     function showQuiz() {
+        // Полностью останавливаем игру
+        stopGame();
+        
         const dev = DEVICES[G.world];
         
+        // Собираем все фишки из всех устройств
         const allFeatures = new Set();
         DEVICES.forEach(d => d.f.forEach(f => allFeatures.add(f)));
         
@@ -1079,26 +1192,28 @@
         const shuffledWrong = wrong.sort(() => Math.random() - 0.5).slice(0, 3);
         const options = [...correct, ...shuffledWrong].sort(() => Math.random() - 0.5);
 
-        let html = `
-            <div class="modal-title">🏁 ФИНАЛЬНЫЙ ТЕСТ</div>
-            <div class="modal-text">Выбери 3 главные фишки ${dev.name}:</div>
-        `;
+        // Заполняем экран теста
+        document.getElementById('quizTitle').textContent = '🏁 ФИНАЛЬНЫЙ ТЕСТ';
+        document.getElementById('quizQuestion').textContent = `Выбери 3 главные фишки ${dev.name}:`;
+        
+        const optionsDiv = document.getElementById('quizOptions');
+        optionsDiv.innerHTML = '';
         
         options.forEach(opt => {
-            html += `<button class="quiz-btn" data-f="${opt}" onclick="toggleQuiz(this)">${opt}</button>`;
+            const btn = document.createElement('div');
+            btn.className = 'quiz-option';
+            btn.textContent = opt;
+            btn.dataset.feature = opt;
+            btn.onclick = function() { toggleQuizOption(this); };
+            optionsDiv.appendChild(btn);
         });
 
-        html += `
-            <div class="modal-btns">
-                <button class="btn primary" onclick="checkQuiz()">ПРОВЕРИТЬ</button>
-            </div>
-        `;
-
-        showModal(html);
+        // Показываем экран теста
+        showScreen('quizScreen');
     }
 
-    function toggleQuiz(btn) {
-        const selected = document.querySelectorAll('.quiz-btn.selected');
+    function toggleQuizOption(btn) {
+        const selected = document.querySelectorAll('.quiz-option.selected');
         if (btn.classList.contains('selected')) {
             btn.classList.remove('selected');
         } else if (selected.length < 3) {
@@ -1106,39 +1221,58 @@
         }
     }
 
-    function checkQuiz() {
+    function checkQuizAnswer() {
         const dev = DEVICES[G.world];
-        const selected = [...document.querySelectorAll('.quiz-btn.selected')].map(b => b.dataset.f);
+        const selectedBtns = document.querySelectorAll('.quiz-option.selected');
+        const selected = [...selectedBtns].map(b => b.dataset.feature);
         
-        let correct = 0;
-        document.querySelectorAll('.quiz-btn').forEach(btn => {
-            const f = btn.dataset.f;
+        let correctCount = 0;
+        document.querySelectorAll('.quiz-option').forEach(btn => {
+            const f = btn.dataset.feature;
             const isCorrect = dev.f.includes(f);
             const isSelected = selected.includes(f);
             
+            // Отключаем клик
+            btn.onclick = null;
+            btn.style.cursor = 'default';
+            
             if (isCorrect) {
                 btn.classList.add('correct');
-                if (isSelected) correct++;
+                if (isSelected) correctCount++;
             } else if (isSelected) {
                 btn.classList.add('wrong');
             }
         });
 
         setTimeout(() => {
-            if (correct === 3) {
-                closeModal();
+            if (correctCount === 3) {
                 showVictory(false);
             } else {
-                document.getElementById('modalContent').innerHTML = `
-                    <div class="modal-title">❌ ПОПРОБУЙ ЕЩЁ!</div>
-                    <div class="modal-text">Правильно: ${correct} из 3<br>Запомни фишки и попробуй снова!</div>
-                    <div class="modal-btns">
-                        <button class="btn primary" onclick="closeModal(); startGame();">ЗАНОВО</button>
-                        <button class="btn secondary" onclick="closeModal(); showMenu();">МЕНЮ</button>
-                    </div>
-                `;
+                showQuizFail(correctCount);
             }
-        }, 1000);
+        }, 1500);
+    }
+
+    function showQuizFail(correctCount) {
+        const container = document.querySelector('.quiz-container');
+        container.innerHTML = `
+            <div class="quiz-result">
+                <div class="quiz-result-icon">❌</div>
+                <div class="quiz-title">ПОПРОБУЙ ЕЩЁ!</div>
+                <div class="quiz-result-text">Правильно: ${correctCount} из 3<br>Запомни фишки и попробуй снова!</div>
+                <div class="quiz-buttons">
+                    <button class="btn primary" onclick="retryLevel()">ЗАНОВО</button>
+                    <button class="btn secondary" onclick="showMenu()">МЕНЮ</button>
+                </div>
+            </div>
+        `;
+    }
+
+    function retryLevel() {
+        showScreen('gameScreen');
+        resizeCanvas();
+        initWorld(G.world);
+        G.gameLoop = requestAnimationFrame(gameLoop);
     }
 
     function showVictory(final) {
