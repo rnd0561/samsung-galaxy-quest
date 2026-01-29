@@ -2,1069 +2,1774 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Galaxy Jump - Samsung Training</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy Training Hub 2026</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
         }
 
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            touch-action: none;
-            font-family: 'Segoe UI', -apple-system, sans-serif;
-            background: #1a1a2e;
+        :root {
+            --primary: #1428a0;
+            --primary-dark: #0d1a6b;
+            --primary-light: #2196f3;
+            --bg: #f4f7f6;
+            --white: #ffffff;
+            --text: #1a1a2e;
+            --text-secondary: #5a5a7a;
+            --success: #00c853;
+            --error: #ff5252;
+            --border: #e8eaed;
+            --shadow: 0 2px 12px rgba(20, 40, 160, 0.08);
+            --radius: 12px;
         }
 
-        /* Экраны */
-        .screen {
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* ===== LAYOUT ===== */
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 280px;
+            background: var(--white);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
             position: fixed;
-            inset: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            transition: opacity 0.3s;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            transition: transform 0.3s ease;
         }
 
-        .screen.hidden {
-            opacity: 0;
-            pointer-events: none;
+        .sidebar-header {
+            padding: 24px 20px;
+            background: var(--primary);
+            color: var(--white);
         }
 
-        /* Меню */
-        .menu-screen {
-            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .logo {
-            font-size: clamp(2.5rem, 10vw, 4rem);
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            margin-bottom: 10px;
-        }
-
-        .logo-sub {
-            font-size: clamp(0.9rem, 3vw, 1.1rem);
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 40px;
-        }
-
-        .btn {
-            padding: 18px 50px;
-            font-size: clamp(1.1rem, 4vw, 1.3rem);
+        .sidebar-logo {
+            font-size: 1.4rem;
             font-weight: 700;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            margin: 10px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .btn:active {
-            transform: scale(0.95);
-        }
-
-        .btn-play {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: #fff;
-            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
-        }
-
-        .btn-worlds {
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-            backdrop-filter: blur(10px);
-        }
-
-        .stats {
             display: flex;
-            gap: 30px;
-            margin-top: 40px;
+            align-items: center;
+            gap: 10px;
         }
 
-        .stat {
-            text-align: center;
-            color: #fff;
-        }
-
-        .stat-num {
-            font-size: 2rem;
-            font-weight: 900;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
+        .sidebar-subtitle {
+            font-size: 0.75rem;
             opacity: 0.8;
+            margin-top: 4px;
         }
 
-        /* Выбор уровня */
-        .levels-screen {
-            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        .sidebar-nav {
+            flex: 1;
             overflow-y: auto;
+            padding: 16px 0;
         }
 
-        .levels-title {
-            font-size: 1.8rem;
-            color: #fff;
-            font-weight: 700;
-            margin-bottom: 20px;
+        .nav-category {
+            padding: 0 16px;
+            margin-bottom: 8px;
         }
 
-        .levels-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 12px;
-            max-width: 400px;
-            width: 100%;
-            max-height: 60vh;
-            overflow-y: auto;
-            padding: 10px;
+        .nav-category-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 8px 8px;
         }
 
-        .level-btn {
-            aspect-ratio: 1;
-            border: none;
-            border-radius: 15px;
-            font-weight: 700;
-            font-size: 1.2rem;
-            cursor: pointer;
+        .nav-item {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 4px;
-            transition: transform 0.2s;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+            color: var(--text);
         }
 
-        .level-btn:active {
-            transform: scale(0.9);
+        .nav-item:hover {
+            background: var(--bg);
         }
 
-        .level-btn.available {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
+        .nav-item.active {
+            background: rgba(20, 40, 160, 0.1);
+            color: var(--primary);
+            font-weight: 600;
         }
 
-        .level-btn.completed {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            color: #fff;
+        .nav-item-icon {
+            font-size: 1.2rem;
+            width: 28px;
+            text-align: center;
         }
 
-        .level-btn.locked {
-            background: rgba(255,255,255,0.1);
-            color: rgba(255,255,255,0.4);
+        .nav-item-badge {
+            margin-left: auto;
+            background: var(--success);
+            color: white;
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: 600;
         }
 
-        .level-btn .stars {
-            font-size: 0.6rem;
+        /* ===== MAIN CONTENT ===== */
+        .main {
+            flex: 1;
+            margin-left: 280px;
+            padding: 32px 40px;
+            max-width: 1200px;
         }
 
-        /* Игра */
-        .game-screen {
-            padding: 0;
-            background: #1a1a2e;
-        }
-
-        #gameCanvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* HUD */
-        .hud {
+        /* ===== MOBILE HEADER ===== */
+        .mobile-header {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
+            height: 60px;
+            background: var(--primary);
+            color: white;
             align-items: center;
-            background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 100%);
-            z-index: 100;
-        }
-
-        .hud-left, .hud-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .hud-item {
-            color: #fff;
-            font-weight: 700;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .hud-item .icon {
-            font-size: 1.3rem;
-        }
-
-        .hud-back {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: #fff;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        /* Обучение попап */
-        .learn-popup {
-            position: fixed;
-            bottom: 100px;
-            left: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 20px;
-            padding: 20px;
-            color: #fff;
+            padding: 0 16px;
             z-index: 200;
-            transform: translateY(200%);
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            gap: 16px;
         }
 
-        .learn-popup.show {
-            transform: translateY(0);
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
         }
 
-        .learn-title {
+        .mobile-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 99;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        /* ===== DEVICE HEADER ===== */
+        .device-header {
+            margin-bottom: 32px;
+        }
+
+        .device-category {
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .device-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .device-title-icon {
+            font-size: 2.5rem;
+        }
+
+        .device-tagline {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+        }
+
+        /* ===== FAB SECTION ===== */
+        .section-title {
             font-size: 1.1rem;
             font-weight: 700;
+            color: var(--text);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .fab-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .fab-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .fab-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(20, 40, 160, 0.12);
+        }
+
+        .fab-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+
+        .fab-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .fab-label.feature {
+            background: rgba(20, 40, 160, 0.1);
+            color: var(--primary);
+        }
+
+        .fab-label.advantage {
+            background: rgba(33, 150, 243, 0.1);
+            color: var(--primary-light);
+        }
+
+        .fab-label.benefit {
+            background: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+        }
+
+        .fab-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .fab-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* ===== SPECS TABLE ===== */
+        .specs-section {
+            margin-bottom: 40px;
+        }
+
+        .specs-table {
+            background: var(--white);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .specs-row {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .specs-row:last-child {
+            border-bottom: none;
+        }
+
+        .specs-label {
+            width: 180px;
+            padding: 16px 20px;
+            background: var(--bg);
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .specs-label-icon {
+            font-size: 1.1rem;
+        }
+
+        .specs-value {
+            flex: 1;
+            padding: 16px 20px;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        /* ===== QUIZ SECTION ===== */
+        .quiz-section {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .quiz-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text);
             margin-bottom: 8px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .learn-text {
-            font-size: 0.95rem;
-            opacity: 0.9;
-            line-height: 1.4;
+        .quiz-question {
+            font-size: 1.05rem;
+            color: var(--text);
+            margin-bottom: 20px;
         }
 
-        /* Тест экран */
-        .test-screen {
-            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-            padding: 20px;
-            overflow-y: auto;
-        }
-
-        .test-title {
-            font-size: clamp(1.5rem, 5vw, 2rem);
-            color: #fff;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .test-subtitle {
-            color: rgba(255,255,255,0.7);
-            margin-bottom: 25px;
-            text-align: center;
-        }
-
-        .test-options {
-            width: 100%;
-            max-width: 450px;
+        .quiz-options {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
 
-        .test-option {
-            padding: 16px 20px;
-            background: rgba(255,255,255,0.1);
+        .quiz-option {
+            padding: 14px 18px;
+            background: var(--bg);
             border: 2px solid transparent;
-            border-radius: 15px;
-            color: #fff;
-            font-size: 1rem;
-            text-align: left;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 0.95rem;
         }
 
-        .test-option:active {
-            transform: scale(0.98);
+        .quiz-option:hover {
+            border-color: var(--primary);
+            background: rgba(20, 40, 160, 0.05);
         }
 
-        .test-option.selected {
-            background: rgba(102, 126, 234, 0.3);
-            border-color: #667eea;
+        .quiz-option.selected {
+            border-color: var(--primary);
+            background: rgba(20, 40, 160, 0.1);
         }
 
-        .test-option.correct {
-            background: rgba(56, 239, 125, 0.3);
-            border-color: #38ef7d;
+        .quiz-option.correct {
+            border-color: var(--success);
+            background: rgba(0, 200, 83, 0.1);
         }
 
-        .test-option.wrong {
-            background: rgba(245, 87, 108, 0.3);
-            border-color: #f5576c;
+        .quiz-option.incorrect {
+            border-color: var(--error);
+            background: rgba(255, 82, 82, 0.1);
         }
 
-        .test-btn {
-            margin-top: 25px;
-            padding: 16px 40px;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        .quiz-option.disabled {
+            pointer-events: none;
+        }
+
+        .quiz-feedback {
+            margin-top: 16px;
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+        }
+
+        .quiz-feedback.correct {
+            background: rgba(0, 200, 83, 0.1);
+            color: var(--success);
+        }
+
+        .quiz-feedback.incorrect {
+            background: rgba(255, 82, 82, 0.1);
+            color: var(--error);
+        }
+
+        .quiz-retry {
+            margin-top: 12px;
+            padding: 10px 20px;
+            background: var(--primary);
+            color: white;
             border: none;
-            border-radius: 50px;
-            color: #fff;
-            font-size: 1.1rem;
-            font-weight: 700;
+            border-radius: 8px;
+            font-weight: 600;
             cursor: pointer;
+            display: none;
         }
 
-        /* Результат */
-        .result-screen {
-            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        .quiz-retry.show {
+            display: inline-block;
         }
 
-        .result-icon {
-            font-size: 5rem;
+        /* ===== PROGRESS BAR ===== */
+        .sidebar-progress {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .progress-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--success) 100%);
+            border-radius: 3px;
+            transition: width 0.3s;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 80px 20px 32px;
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .device-title {
+                font-size: 1.6rem;
+            }
+
+            .fab-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .specs-row {
+                flex-direction: column;
+            }
+
+            .specs-label {
+                width: 100%;
+                padding: 12px 16px;
+            }
+
+            .specs-value {
+                padding: 12px 16px;
+            }
+        }
+
+        /* ===== WELCOME SCREEN ===== */
+        .welcome {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .welcome-icon {
+            font-size: 4rem;
             margin-bottom: 20px;
         }
 
-        .result-title {
-            font-size: 2rem;
-            color: #fff;
+        .welcome-title {
+            font-size: 1.8rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            color: var(--text);
+            margin-bottom: 12px;
         }
 
-        .result-text {
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 30px;
+        .welcome-text {
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0 auto 30px;
+        }
+
+        .welcome-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .welcome-stat {
             text-align: center;
         }
 
-        /* Управление */
-        .controls {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 120px;
-            display: flex;
-            justify-content: space-between;
-            padding: 20px 30px;
-            z-index: 100;
+        .welcome-stat-num {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
         }
 
-        .ctrl-side {
-            width: 100px;
-            height: 80px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: rgba(255,255,255,0.6);
-        }
-
-        .ctrl-side:active {
-            background: rgba(255,255,255,0.3);
+        .welcome-stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
     </style>
 </head>
 <body>
-    <!-- МЕНЮ -->
-    <div class="screen menu-screen" id="menuScreen">
-        <div class="logo">GALAXY JUMP</div>
-        <div class="logo-sub">Samsung Training Game</div>
-        <button class="btn btn-play" onclick="playGame()">ИГРАТЬ</button>
-        <button class="btn btn-worlds" onclick="showLevels()">УРОВНИ</button>
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-num" id="statLevels">0</div>
-                <div class="stat-label">Уровней</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num" id="statStars">0</div>
-                <div class="stat-label">Звёзд</div>
-            </div>
-            <div class="stat">
-                <div class="stat-num" id="statCoins">0</div>
-                <div class="stat-label">Монет</div>
-            </div>
+    <div class="app">
+        <!-- MOBILE HEADER -->
+        <div class="mobile-header">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <span class="mobile-title">Galaxy Training Hub</span>
         </div>
-    </div>
 
-    <!-- УРОВНИ -->
-    <div class="screen levels-screen hidden" id="levelsScreen">
-        <div class="levels-title">ВЫБЕРИ УРОВЕНЬ</div>
-        <div class="levels-grid" id="levelsGrid"></div>
-        <button class="btn btn-worlds" onclick="showMenu()" style="margin-top:20px">НАЗАД</button>
-    </div>
+        <!-- OVERLAY -->
+        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
 
-    <!-- ИГРА -->
-    <div class="screen game-screen hidden" id="gameScreen">
-        <div class="hud">
-            <div class="hud-left">
-                <button class="hud-back" onclick="showMenu()">✕</button>
-                <div class="hud-item"><span class="icon">⭐</span><span id="hudStars">0/3</span></div>
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">📱 Galaxy Training Hub</div>
+                <div class="sidebar-subtitle">Линейка 2026 года</div>
             </div>
-            <div class="hud-right">
-                <div class="hud-item"><span class="icon">🪙</span><span id="hudCoins">0</span></div>
+            <nav class="sidebar-nav" id="sidebarNav"></nav>
+            <div class="sidebar-progress">
+                <div class="progress-label">
+                    <span>Прогресс обучения</span>
+                    <span id="progressText">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
             </div>
-        </div>
-        <canvas id="gameCanvas"></canvas>
-        <div class="controls">
-            <div class="ctrl-side" id="ctrlLeft">◀</div>
-            <div class="ctrl-side" id="ctrlRight">▶</div>
-        </div>
-        <div class="learn-popup" id="learnPopup">
-            <div class="learn-title"><span>⭐</span> <span id="learnTitle">Фишка</span></div>
-            <div class="learn-text" id="learnText">Описание фишки</div>
-        </div>
-    </div>
+        </aside>
 
-    <!-- ТЕСТ -->
-    <div class="screen test-screen hidden" id="testScreen">
-        <div class="test-title" id="testTitle">🏆 ФИНАЛЬНЫЙ ТЕСТ</div>
-        <div class="test-subtitle" id="testSubtitle">Выбери 3 главные фишки устройства:</div>
-        <div class="test-options" id="testOptions"></div>
-        <button class="test-btn" onclick="checkTest()">ПРОВЕРИТЬ</button>
-    </div>
-
-    <!-- РЕЗУЛЬТАТ -->
-    <div class="screen result-screen hidden" id="resultScreen">
-        <div class="result-icon" id="resultIcon">🎉</div>
-        <div class="result-title" id="resultTitle">УРОВЕНЬ ПРОЙДЕН!</div>
-        <div class="result-text" id="resultText">Вы изучили все фишки устройства</div>
-        <button class="btn btn-play" onclick="nextLevel()">ДАЛЬШЕ</button>
-        <button class="btn btn-worlds" onclick="showMenu()">МЕНЮ</button>
+        <!-- MAIN CONTENT -->
+        <main class="main" id="mainContent">
+            <div class="welcome">
+                <div class="welcome-icon">🚀</div>
+                <div class="welcome-title">Добро пожаловать!</div>
+                <div class="welcome-text">
+                    Изучите линейку Samsung Galaxy 2026 года. Выберите устройство в меню слева, чтобы узнать ключевые преимущества и характеристики.
+                </div>
+                <div class="welcome-stats">
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-num" id="totalDevices">0</div>
+                        <div class="welcome-stat-label">Устройств</div>
+                    </div>
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-num" id="totalCategories">5</div>
+                        <div class="welcome-stat-label">Категорий</div>
+                    </div>
+                    <div class="welcome-stat">
+                        <div class="welcome-stat-num" id="learnedCount">0</div>
+                        <div class="welcome-stat-label">Изучено</div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
-    // ===== ДАННЫЕ =====
-    const DEVICES = [
-        { name: "Galaxy A56", f: ["Сила интеллекта", "Совершенство в каждом кадре", "Крутая производительность"], d: ["Функция «Обвести и найти», AI рекомендации, создание фотофильтров с AI", "50 МП камера с OIS, HDR-съёмка, портретная съёмка с AI", "Супербыстрая зарядка 45 Вт, 4 нм процессор, продвинутое охлаждение"] },
-        { name: "Galaxy S25 Ultra", f: ["Решай задачи по-новому", "Играй по-новому", "Создавай контент по-новому"], d: ["AI поиск, голосовой помощник, статус-виджет", "3 нм Snapdragon 8 Elite, сверхскоростная AI обработка", "200 МП камера, AI зум, ассистент по видео"] },
-        { name: "Galaxy S25", f: ["Решай задачи по-новому", "Играй по-новому", "Создавай контент по-новому"], d: ["Интуитивный AI поиск, мгновенные задачи", "Первый 3 нм процессор в линейке Galaxy S", "Чёткие портреты, плавность зума"] },
-        { name: "Galaxy S25+", f: ["Решай задачи по-новому", "Играй по-новому", "Создавай контент по-новому"], d: ["Интуитивный AI поиск, статус-виджет", "3 нм Snapdragon 8 Elite суперпроцессор", "Портреты, AI зум, ассистент видео"] },
-        { name: "Galaxy Z Fold6", f: ["Сила интеллекта и творчества", "Камера как в Z Flip7", "Крутая производительность и надежность"], d: ["Заметки с AI-переводом, сводка текста", "Флекс-камера, зум x2, автокадрирование", "Snapdragon 8 Gen 3, IP48, броня"] },
-        { name: "Galaxy Z Flip6", f: ["Сила интеллекта и творчества", "Камера как в Z Flip7", "Крутая производительность"], d: ["AI-ответы, переводчик, виджеты", "50 МП камера, автокадрирование", "Snapdragon 8 Gen 3, 4000 мАч"] },
-        { name: "Galaxy A55", f: ["Сила интеллекта", "Совершенство в каждом кадре", "Крутая производительность"], d: ["Обвести и найти, AI рекомендации", "50 МП с OIS, ночная съёмка, HDR", "Зарядка 25 Вт, 5 нм процессор"] },
-        { name: "Galaxy A35", f: ["Сила интеллекта", "Совершенство в каждом кадре", "Крутая производительность"], d: ["AI рекомендации, Smart Switch", "50 МП камера, портреты", "5000 мАч, 25 Вт зарядка"] },
-        { name: "Galaxy A16", f: ["Экран на максимум", "Надёжность", "Крутая производительность"], d: ["6.7\" FHD+ Super AMOLED 90 Гц", "IP54, 6 лет обновлений", "5000 мАч, 25 Вт зарядка"] },
-        { name: "Galaxy A06", f: ["Экран на максимум", "Совершенство в каждом кадре", "Крутая производительность"], d: ["6.7\" HD+ 60 Гц экран", "50 МП камера, портреты", "5000 мАч батарея"] },
-        { name: "Galaxy S24 FE", f: ["Сила интеллекта", "Совершенство в каждом кадре", "Крутая производительность"], d: ["Galaxy AI, обвести и найти", "50 МП камера с 3x зумом", "Exynos 2400e, 4700 мАч"] },
-        { name: "Galaxy Tab S10 Ultra", f: ["Сила интеллекта и творчества", "Экран на максимум", "Крутая производительность"], d: ["Помощник заметок, перевод PDF", "14.6\" Dynamic AMOLED 2X, 120 Гц", "MediaTek Dimensity 9300+, 11200 мАч"] },
-        { name: "Galaxy Tab S10+", f: ["Сила интеллекта и творчества", "Экран на максимум", "Крутая производительность"], d: ["Galaxy AI в заметках", "12.4\" Dynamic AMOLED 2X", "MediaTek Dimensity 9300+"] },
-        { name: "Galaxy Tab A9+", f: ["Экран на максимум", "Крутая производительность", "Развлечения"], d: ["11\" TFT LCD экран, стерео", "8 ГБ ОЗУ, быстрый процессор", "Мультиоконность, Samsung TV+"] },
-        { name: "Galaxy Tab S6 Lite 2024", f: ["Сила интеллекта и творчества", "Экран на максимум", "Крутая производительность"], d: ["S Pen в комплекте, Galaxy AI", "10.4\" TFT экран", "8 ГБ ОЗУ, 128 ГБ память"] },
-        { name: "Galaxy Watch Ultra", f: ["Надежность", "Здоровье", "Умные функции"], d: ["Титановый корпус 47 мм, 10 ATM, IP68", "Пульс, ЭКГ, кислород, сон, стресс", "Dual-GPS, двойная кнопка, eSIM"] },
-        { name: "Galaxy Watch7", f: ["Здоровье", "Умные функции", "Стиль"], d: ["BioActive датчик, AGEs индекс, Energy Score", "Wear OS, Google Карты, Wallet", "Алюминий/сталь, сменные ремешки"] },
-        { name: "Galaxy Watch FE", f: ["Здоровье", "Умные функции", "Стиль"], d: ["Пульс, ЭКГ, сон, циклы", "Wear OS, Google Assistant", "Алюминий 40 мм, ремешки"] },
-        { name: "Galaxy Buds3 Pro", f: ["Звук на максимум", "Умные функции", "Комфорт"], d: ["2-полосный динамик, 24-бит Hi-Fi, ANC", "Адаптивный ANC, 360 Audio", "Blade Lights, IP57, 7 ч работы"] },
-        { name: "Galaxy Buds3", f: ["Звук на максимум", "Умные функции", "Комфорт"], d: ["11 мм динамик, AAC/SSC кодеки", "Адаптивный ANC, авто-переключение", "Open-type дизайн, 6 ч работы"] },
-        { name: "Galaxy Buds FE", f: ["Звук на максимум", "Умные функции", "Комфорт"], d: ["ANC, 3 микрофона", "360 Audio, авто-переключение", "IPX2, 8.5 ч работы"] },
-        { name: "Galaxy Ring", f: ["Здоровье", "Комфорт", "Умные функции"], d: ["Пульс, сон, шаги, циклы", "Титан, 2.6 г, 7 дней батареи", "Galaxy AI анализ, Find My Ring"] },
-        { name: "Galaxy Book5 Pro 360", f: ["Сила интеллекта", "Экран на максимум", "Крутая производительность"], d: ["Intel Core Ultra, NPU 47 TOPS", "16\" 3K AMOLED сенсорный, S Pen", "Intel Arc GPU, Wi-Fi 7"] }
-    ];
+    // ===== DATA =====
+    const DATA = {
+        categories: [
+            { id: 'sFamily', name: 'S-серия', icon: '⭐' },
+            { id: 'zFamily', name: 'Z-серия', icon: '📐' },
+            { id: 'aFamily', name: 'A-серия', icon: '💎' },
+            { id: 'tablets', name: 'Планшеты', icon: '📱' },
+            { id: 'wearables', name: 'Носимые', icon: '⌚' }
+        ],
+        devices: [
+            // ===== S-SERIES =====
+            {
+                id: 's25ultra',
+                category: 'sFamily',
+                name: 'Galaxy S25 Ultra',
+                icon: '📱',
+                tagline: 'Абсолютный флагман с Galaxy AI и титановым корпусом',
+                fab: [
+                    {
+                        icon: '🧠',
+                        feature: 'Snapdragon 8 Elite (3 нм)',
+                        advantage: 'Максимальная производительность NPU и энергоэффективность',
+                        benefit: 'Мгновенная обработка AI-задач, редактирование фото за секунды, до 2 дней автономности'
+                    },
+                    {
+                        icon: '📸',
+                        feature: '200 МП основная камера + 50 МП телефото 5x',
+                        advantage: 'Лучшее разрешение и оптический зум в классе',
+                        benefit: 'Детализированные фото днём и ночью, снимки луны и удалённых объектов без потери качества'
+                    },
+                    {
+                        icon: '✏️',
+                        feature: 'Встроенный S Pen с AI-функциями',
+                        advantage: 'Рукописный ввод с распознаванием и переводом',
+                        benefit: 'Конспектируйте встречи, а AI превратит записи в структурированный текст'
+                    }
+                ],
+                specs: {
+                    screen: '6.9" QHD+ Dynamic AMOLED 2X, 120 Гц, 3000 нит',
+                    cpu: 'Snapdragon 8 Elite (3 нм)',
+                    battery: '5000 мАч / 45 Вт',
+                    camera: '200+50+12+50 МП / 12 МП фронт',
+                    memory: '12/16 ГБ / 256-1024 ГБ',
+                    protection: 'IP68, Gorilla Armor 2',
+                    dimensions: '162.8×77.6×8.2 мм, 218 г, титан'
+                },
+                quiz: {
+                    question: 'Какой процессор установлен в Galaxy S25 Ultra?',
+                    options: ['Exynos 2500', 'Snapdragon 8 Elite', 'Dimensity 9400', 'Apple A18 Pro'],
+                    correct: 1
+                }
+            },
+            {
+                id: 's25plus',
+                category: 'sFamily',
+                name: 'Galaxy S25+',
+                icon: '📱',
+                tagline: 'Большой экран и флагманская производительность',
+                fab: [
+                    {
+                        icon: '🖥️',
+                        feature: '6.7" Dynamic AMOLED 2X с Vision Booster',
+                        advantage: 'Яркость до 2900 нит и адаптивная частота 1-120 Гц',
+                        benefit: 'Идеально видно на солнце, плавная картинка и экономия батареи'
+                    },
+                    {
+                        icon: '🔋',
+                        feature: 'Аккумулятор 4900 мАч с зарядкой 45 Вт',
+                        advantage: 'Быстрая зарядка и оптимизация AI',
+                        benefit: 'От 0 до 65% за 30 минут, полный день активного использования'
+                    },
+                    {
+                        icon: '🤖',
+                        feature: 'Galaxy AI с поддержкой на устройстве',
+                        advantage: 'Перевод звонков, суммаризация, генерация без интернета',
+                        benefit: 'Приватность данных и работа AI-функций в любом месте'
+                    }
+                ],
+                specs: {
+                    screen: '6.7" QHD+ Dynamic AMOLED 2X, 120 Гц, 2900 нит',
+                    cpu: 'Snapdragon 8 Elite (3 нм)',
+                    battery: '4900 мАч / 45 Вт',
+                    camera: '50+12+10 МП / 12 МП фронт',
+                    memory: '12 ГБ / 256-512 ГБ',
+                    protection: 'IP68, Gorilla Victus 2',
+                    dimensions: '158.4×75.7×7.3 мм, 190 г'
+                },
+                quiz: {
+                    question: 'Какая максимальная яркость экрана у S25+?',
+                    options: ['2000 нит', '2500 нит', '2900 нит', '3500 нит'],
+                    correct: 2
+                }
+            },
+            {
+                id: 's25',
+                category: 'sFamily',
+                name: 'Galaxy S25',
+                icon: '📱',
+                tagline: 'Компактный флагман с полным набором AI-функций',
+                fab: [
+                    {
+                        icon: '📏',
+                        feature: 'Компактный корпус 6.2" и 162 грамма',
+                        advantage: 'Флагманская мощность в удобном размере',
+                        benefit: 'Комфортное управление одной рукой без компромиссов в производительности'
+                    },
+                    {
+                        icon: '🎨',
+                        feature: 'ProVisual Engine с AI-обработкой',
+                        advantage: 'Улучшение фото и видео в реальном времени',
+                        benefit: 'Профессиональные снимки без настроек — AI сделает всё за вас'
+                    },
+                    {
+                        icon: '🔒',
+                        feature: 'Samsung Knox Vault и 7 лет обновлений',
+                        advantage: 'Аппаратная защита и долгая поддержка',
+                        benefit: 'Ваши данные в безопасности, телефон актуален до 2032 года'
+                    }
+                ],
+                specs: {
+                    screen: '6.2" FHD+ Dynamic AMOLED 2X, 120 Гц, 2600 нит',
+                    cpu: 'Snapdragon 8 Elite (3 нм)',
+                    battery: '4000 мАч / 25 Вт',
+                    camera: '50+12+10 МП / 12 МП фронт',
+                    memory: '12 ГБ / 128-512 ГБ',
+                    protection: 'IP68, Gorilla Victus 2',
+                    dimensions: '146.9×70.5×7.2 мм, 162 г'
+                },
+                quiz: {
+                    question: 'Сколько лет обновлений гарантирует Samsung для S25?',
+                    options: ['4 года', '5 лет', '6 лет', '7 лет'],
+                    correct: 3
+                }
+            },
+            {
+                id: 's24fe',
+                category: 'sFamily',
+                name: 'Galaxy S25 FE',
+                icon: '📱',
+                tagline: 'Флагманские возможности по доступной цене',
+                fab: [
+                    {
+                        icon: '💰',
+                        feature: 'Exynos 2400e с Galaxy AI',
+                        advantage: 'Флагманский AI по цене среднего сегмента',
+                        benefit: 'Все функции Galaxy AI: перевод, суммаризация, редактирование — без переплаты'
+                    },
+                    {
+                        icon: '📷',
+                        feature: '50 МП камера с OIS и 3x телефото',
+                        advantage: 'Стабилизация и зум как у старших моделей',
+                        benefit: 'Чёткие фото в движении и качественное приближение без шумов'
+                    },
+                    {
+                        icon: '🔋',
+                        feature: '4700 мАч с интеллектуальной оптимизацией',
+                        advantage: 'AI изучает ваши привычки использования',
+                        benefit: 'Батарея подстраивается под вас — заряда хватает на весь день'
+                    }
+                ],
+                specs: {
+                    screen: '6.7" FHD+ Dynamic AMOLED 2X, 120 Гц, 1900 нит',
+                    cpu: 'Exynos 2400e (4 нм)',
+                    battery: '4700 мАч / 25 Вт',
+                    camera: '50+12+8 МП / 10 МП фронт',
+                    memory: '8 ГБ / 128-256 ГБ',
+                    protection: 'IP68, Gorilla Victus+',
+                    dimensions: '162×77.3×8.0 мм, 213 г'
+                },
+                quiz: {
+                    question: 'Какой процессор используется в Galaxy S25 FE?',
+                    options: ['Snapdragon 8 Gen 2', 'Exynos 2400e', 'Dimensity 9200', 'Snapdragon 7 Gen 3'],
+                    correct: 1
+                }
+            },
 
-    // ===== СОСТОЯНИЕ =====
-    const G = {
-        level: 0,
-        completed: [],
-        totalStars: 0,
-        totalCoins: 0,
-        // Игра
-        px: 0,
-        py: 0,
-        vx: 0,
-        vy: 0,
-        platforms: [],
-        stars: [],
-        coins: [],
-        collectedStars: [],
-        levelCoins: 0,
-        cameraY: 0,
-        finishY: 0,
-        gameLoop: null,
-        moveLeft: false,
-        moveRight: false,
-        gameOver: false,
-        reachedFinish: false
+            // ===== Z-SERIES =====
+            {
+                id: 'zfold7',
+                category: 'zFamily',
+                name: 'Galaxy Z Fold7',
+                icon: '📐',
+                tagline: 'Самый тонкий складной флагман в истории Galaxy',
+                fab: [
+                    {
+                        icon: '📏',
+                        feature: 'Толщина всего 9.9 мм в сложенном виде',
+                        advantage: 'На 2.5 мм тоньше предшественника',
+                        benefit: 'Помещается в любой карман, не выделяется как "раскладушка"'
+                    },
+                    {
+                        icon: '🖥️',
+                        feature: '7.6" основной + 6.3" внешний Flex AMOLED',
+                        advantage: 'Два полноценных экрана с S Pen поддержкой',
+                        benefit: 'Планшет для работы и компактный смартфон — два в одном'
+                    },
+                    {
+                        icon: '💪',
+                        feature: 'Armor Aluminum + Flex Hinge 2.0',
+                        advantage: '400 000 складываний, IPX8 защита',
+                        benefit: 'Надёжность обычного смартфона в складном форм-факторе'
+                    }
+                ],
+                specs: {
+                    screen: '7.6" + 6.3" Dynamic AMOLED 2X, 120 Гц',
+                    cpu: 'Snapdragon 8 Elite (3 нм)',
+                    battery: '4400 мАч / 25 Вт',
+                    camera: '50+12+10 МП / 4 МП под экраном',
+                    memory: '12 ГБ / 256-1024 ГБ',
+                    protection: 'IPX8, Armor Aluminum',
+                    dimensions: '153×68×9.9 мм (сложен), 239 г'
+                },
+                quiz: {
+                    question: 'Какая толщина Galaxy Z Fold7 в сложенном состоянии?',
+                    options: ['11.5 мм', '10.8 мм', '9.9 мм', '8.5 мм'],
+                    correct: 2
+                }
+            },
+            {
+                id: 'zflip7',
+                category: 'zFamily',
+                name: 'Galaxy Z Flip7',
+                icon: '📐',
+                tagline: 'Стильная раскладушка с большим внешним экраном',
+                fab: [
+                    {
+                        icon: '🖼️',
+                        feature: '4.0" Super AMOLED внешний дисплей',
+                        advantage: 'Полноценные виджеты и приложения без раскрытия',
+                        benefit: 'Отвечайте на сообщения, управляйте музыкой — телефон в кармане'
+                    },
+                    {
+                        icon: '📸',
+                        feature: '50 МП камера с FlexCam',
+                        advantage: 'Съёмка под любым углом без штатива',
+                        benefit: 'Идеальные групповые селфи и таймлапсы — поставил и снимай'
+                    },
+                    {
+                        icon: '🎨',
+                        feature: '7 новых расцветок и аксессуары',
+                        advantage: 'Персонализация внешнего вида',
+                        benefit: 'Телефон как модный аксессуар — подберите под свой стиль'
+                    }
+                ],
+                specs: {
+                    screen: '6.7" + 4.0" Dynamic AMOLED 2X, 120 Гц',
+                    cpu: 'Snapdragon 8 Elite (3 нм)',
+                    battery: '4000 мАч / 25 Вт',
+                    camera: '50+12 МП / 10 МП фронт',
+                    memory: '12 ГБ / 256-512 ГБ',
+                    protection: 'IPX8, Armor Aluminum',
+                    dimensions: '85×72×14.9 мм (сложен), 187 г'
+                },
+                quiz: {
+                    question: 'Какой размер внешнего дисплея у Z Flip7?',
+                    options: ['3.4"', '4.0"', '2.7"', '3.0"'],
+                    correct: 1
+                }
+            },
+            {
+                id: 'zflipfe',
+                category: 'zFamily',
+                name: 'Galaxy Z Flip FE',
+                icon: '📐',
+                tagline: 'Доступный вход в мир складных смартфонов',
+                fab: [
+                    {
+                        icon: '💵',
+                        feature: 'Цена от 59 990 ₽',
+                        advantage: 'Самый доступный складной Samsung',
+                        benefit: 'Попробуйте складной форм-фактор без больших вложений'
+                    },
+                    {
+                        icon: '🔄',
+                        feature: 'Проверенный Snapdragon 8 Gen 2',
+                        advantage: 'Мощный и энергоэффективный чипсет',
+                        benefit: 'Плавная работа всех приложений и игр, отличная автономность'
+                    },
+                    {
+                        icon: '📱',
+                        feature: '6.7" FHD+ главный экран 120 Гц',
+                        advantage: 'Такой же размер как у флагмана',
+                        benefit: 'Полноценный опыт использования без компромиссов по экрану'
+                    }
+                ],
+                specs: {
+                    screen: '6.7" + 3.4" Dynamic AMOLED, 120 Гц',
+                    cpu: 'Snapdragon 8 Gen 2 (4 нм)',
+                    battery: '3700 мАч / 25 Вт',
+                    camera: '50+12 МП / 10 МП фронт',
+                    memory: '8 ГБ / 128-256 ГБ',
+                    protection: 'IPX8',
+                    dimensions: '85×72×15.8 мм (сложен), 191 г'
+                },
+                quiz: {
+                    question: 'Какой процессор установлен в Z Flip FE?',
+                    options: ['Snapdragon 8 Elite', 'Snapdragon 8 Gen 2', 'Exynos 2400', 'Dimensity 9300'],
+                    correct: 1
+                }
+            },
+
+            // ===== A-SERIES =====
+            {
+                id: 'a56',
+                category: 'aFamily',
+                name: 'Galaxy A56',
+                icon: '💎',
+                tagline: 'Премиальный средний класс с Galaxy AI',
+                fab: [
+                    {
+                        icon: '🧠',
+                        feature: 'Exynos 1580 (4 нм) с Galaxy AI',
+                        advantage: 'AI-функции как у флагманов',
+                        benefit: 'Обвести и найти, суммаризация, редактирование фото — в среднем сегменте'
+                    },
+                    {
+                        icon: '📸',
+                        feature: '50 МП камера с OIS + ночной режим',
+                        advantage: 'Оптическая стабилизация и AI-обработка',
+                        benefit: 'Чёткие фото даже в темноте и в движении'
+                    },
+                    {
+                        icon: '🛡️',
+                        feature: 'IP67 + 6 лет обновлений',
+                        advantage: 'Защита от воды и долгая поддержка',
+                        benefit: 'Телефон прослужит долго и переживёт случайные инциденты'
+                    }
+                ],
+                specs: {
+                    screen: '6.7" FHD+ Super AMOLED, 120 Гц, 1800 нит',
+                    cpu: 'Exynos 1580 (4 нм)',
+                    battery: '5000 мАч / 45 Вт',
+                    camera: '50+12+5 МП / 12 МП фронт',
+                    memory: '8/12 ГБ / 128-256 ГБ',
+                    protection: 'IP67, Gorilla Victus+',
+                    dimensions: '164×77×7.9 мм, 192 г'
+                },
+                quiz: {
+                    question: 'Сколько лет обновлений получит Galaxy A56?',
+                    options: ['4 года', '5 лет', '6 лет', '7 лет'],
+                    correct: 2
+                }
+            },
+            {
+                id: 'a36',
+                category: 'aFamily',
+                name: 'Galaxy A36',
+                icon: '💎',
+                tagline: 'Оптимальный баланс цены и возможностей',
+                fab: [
+                    {
+                        icon: '🖥️',
+                        feature: '6.6" Super AMOLED 120 Гц',
+                        advantage: 'Плавный и яркий дисплей',
+                        benefit: 'Комфортный просмотр видео и скроллинг соцсетей'
+                    },
+                    {
+                        icon: '🔋',
+                        feature: '5000 мАч + 25 Вт зарядка',
+                        advantage: 'Весь день без подзарядки',
+                        benefit: 'Забудьте про powerbank — телефон держит до вечера'
+                    },
+                    {
+                        icon: '📷',
+                        feature: '50 МП с OIS + широкоугольная',
+                        advantage: 'Универсальная камера для любых сцен',
+                        benefit: 'Отличные фото для соцсетей без переплаты за флагман'
+                    }
+                ],
+                specs: {
+                    screen: '6.6" FHD+ Super AMOLED, 120 Гц, 1100 нит',
+                    cpu: 'Snapdragon 6 Gen 3 (4 нм)',
+                    battery: '5000 мАч / 25 Вт',
+                    camera: '50+8+5 МП / 13 МП фронт',
+                    memory: '6/8 ГБ / 128-256 ГБ',
+                    protection: 'IP54',
+                    dimensions: '162×76×7.8 мм, 186 г'
+                },
+                quiz: {
+                    question: 'Какая защита от воды у Galaxy A36?',
+                    options: ['IP68', 'IP67', 'IP54', 'Нет защиты'],
+                    correct: 2
+                }
+            },
+            {
+                id: 'a26',
+                category: 'aFamily',
+                name: 'Galaxy A26',
+                icon: '💎',
+                tagline: 'Доступный 5G-смартфон для молодёжи',
+                fab: [
+                    {
+                        icon: '📶',
+                        feature: '5G-модем + Wi-Fi 6',
+                        advantage: 'Скоростной интернет нового поколения',
+                        benefit: 'Быстрая загрузка видео и игр, стриминг без буферизации'
+                    },
+                    {
+                        icon: '🎮',
+                        feature: 'Game Booster и 8 ГБ ОЗУ',
+                        advantage: 'Оптимизация для игр',
+                        benefit: 'Играйте в PUBG и Genshin без лагов'
+                    },
+                    {
+                        icon: '🔒',
+                        feature: 'Samsung Knox и 4 года обновлений',
+                        advantage: 'Безопасность и актуальность',
+                        benefit: 'Защита данных и свежий софт на годы вперёд'
+                    }
+                ],
+                specs: {
+                    screen: '6.5" FHD+ Super AMOLED, 90 Гц',
+                    cpu: 'Dimensity 6300 (6 нм)',
+                    battery: '5000 мАч / 25 Вт',
+                    camera: '50+5+2 МП / 8 МП фронт',
+                    memory: '6/8 ГБ / 128 ГБ',
+                    protection: 'IP54',
+                    dimensions: '160×75×8.1 мм, 180 г'
+                },
+                quiz: {
+                    question: 'Какая частота обновления экрана у A26?',
+                    options: ['60 Гц', '90 Гц', '120 Гц', '144 Гц'],
+                    correct: 1
+                }
+            },
+            {
+                id: 'a17',
+                category: 'aFamily',
+                name: 'Galaxy A17',
+                icon: '💎',
+                tagline: 'Надёжный смартфон на каждый день',
+                fab: [
+                    {
+                        icon: '🔋',
+                        feature: '5000 мАч аккумулятор',
+                        advantage: 'До 2 дней работы',
+                        benefit: 'Заряжайте телефон через день — экономьте время'
+                    },
+                    {
+                        icon: '📺',
+                        feature: '6.7" HD+ дисплей',
+                        advantage: 'Большой экран для контента',
+                        benefit: 'Смотрите видео и читайте с комфортом'
+                    },
+                    {
+                        icon: '💾',
+                        feature: 'Слот для microSD до 1 ТБ',
+                        advantage: 'Расширяемая память',
+                        benefit: 'Храните все фото и видео — места хватит'
+                    }
+                ],
+                specs: {
+                    screen: '6.7" HD+ PLS LCD, 60 Гц',
+                    cpu: 'Helio G85',
+                    battery: '5000 мАч / 15 Вт',
+                    camera: '50+5+2 МП / 8 МП фронт',
+                    memory: '4/6 ГБ / 64-128 ГБ + microSD',
+                    protection: 'Нет',
+                    dimensions: '166×77×8.9 мм, 200 г'
+                },
+                quiz: {
+                    question: 'До какого объёма можно расширить память в A17?',
+                    options: ['256 ГБ', '512 ГБ', '1 ТБ', '2 ТБ'],
+                    correct: 2
+                }
+            },
+            {
+                id: 'a07',
+                category: 'aFamily',
+                name: 'Galaxy A07',
+                icon: '💎',
+                tagline: 'Бюджетный смартфон для базовых задач',
+                fab: [
+                    {
+                        icon: '💵',
+                        feature: 'Цена от 9 990 ₽',
+                        advantage: 'Самый доступный Galaxy',
+                        benefit: 'Смартфон Samsung для всей семьи без переплаты'
+                    },
+                    {
+                        icon: '📱',
+                        feature: '6.5" HD+ экран',
+                        advantage: 'Комфортный размер',
+                        benefit: 'Удобно звонить, общаться в мессенджерах, смотреть видео'
+                    },
+                    {
+                        icon: '🔋',
+                        feature: '5000 мАч батарея',
+                        advantage: 'Надёжная автономность',
+                        benefit: 'Телефон работает весь день даже при активном использовании'
+                    }
+                ],
+                specs: {
+                    screen: '6.5" HD+ PLS LCD, 60 Гц',
+                    cpu: 'Helio G50',
+                    battery: '5000 мАч / 15 Вт',
+                    camera: '50+2 МП / 5 МП фронт',
+                    memory: '4 ГБ / 64-128 ГБ + microSD',
+                    protection: 'Нет',
+                    dimensions: '165×76×9.1 мм, 195 г'
+                },
+                quiz: {
+                    question: 'Какой экран установлен в Galaxy A07?',
+                    options: ['AMOLED', 'PLS LCD', 'IPS', 'OLED'],
+                    correct: 1
+                }
+            },
+
+            // ===== TABLETS =====
+            {
+                id: 'tabs11ultra',
+                category: 'tablets',
+                name: 'Galaxy Tab S11 Ultra',
+                icon: '📱',
+                tagline: 'Профессиональный планшет с огромным экраном',
+                fab: [
+                    {
+                        icon: '🖥️',
+                        feature: '14.6" Dynamic AMOLED 2X, 3000 нит',
+                        advantage: 'Самый яркий экран среди планшетов',
+                        benefit: 'Работайте и творите на солнце — всё отлично видно'
+                    },
+                    {
+                        icon: '⚡',
+                        feature: 'Dimensity 9400+ (3 нм)',
+                        advantage: 'Производительность уровня MacBook',
+                        benefit: 'Тяжёлые приложения, видеомонтаж, 3D — всё без тормозов'
+                    },
+                    {
+                        icon: '✏️',
+                        feature: 'S Pen с AI-функциями в комплекте',
+                        advantage: 'Распознавание рукописного текста и перевод',
+                        benefit: 'Рисуйте, конспектируйте — AI превратит в цифровой текст'
+                    }
+                ],
+                specs: {
+                    screen: '14.6" WQXGA+ Dynamic AMOLED 2X, 120 Гц, 3000 нит',
+                    cpu: 'Dimensity 9400+ (3 нм)',
+                    battery: '11200 мАч / 45 Вт',
+                    camera: '13+8 МП / 12+12 МП фронт',
+                    memory: '12/16 ГБ / 256-1024 ГБ',
+                    protection: 'IP68',
+                    dimensions: '326×208×5.4 мм, 609 г'
+                },
+                quiz: {
+                    question: 'Какая пиковая яркость экрана у Tab S11 Ultra?',
+                    options: ['1600 нит', '2000 нит', '2500 нит', '3000 нит'],
+                    correct: 3
+                }
+            },
+            {
+                id: 'tabs11',
+                category: 'tablets',
+                name: 'Galaxy Tab S11',
+                icon: '📱',
+                tagline: 'Компактный флагманский планшет',
+                fab: [
+                    {
+                        icon: '📏',
+                        feature: '11" AMOLED в легком корпусе 450 г',
+                        advantage: 'Портативность и премиальный экран',
+                        benefit: 'Берите везде — в сумке, рюкзаке, даже в большом кармане'
+                    },
+                    {
+                        icon: '🎬',
+                        feature: 'Четыре динамика AKG с Dolby Atmos',
+                        advantage: 'Объёмный кинематографический звук',
+                        benefit: 'Смотрите фильмы как в кинотеатре — без наушников'
+                    },
+                    {
+                        icon: '🔋',
+                        feature: '8400 мАч + 45 Вт зарядка',
+                        advantage: 'До 15 часов видео, быстрая зарядка',
+                        benefit: 'Марафон сериалов без перерыва на зарядку'
+                    }
+                ],
+                specs: {
+                    screen: '11" WQXGA Dynamic AMOLED 2X, 120 Гц, 2000 нит',
+                    cpu: 'Dimensity 9400+ (3 нм)',
+                    battery: '8400 мАч / 45 Вт',
+                    camera: '13+8 МП / 12 МП фронт',
+                    memory: '8/12 ГБ / 128-512 ГБ',
+                    protection: 'IP68',
+                    dimensions: '254×165×5.7 мм, 450 г'
+                },
+                quiz: {
+                    question: 'Сколько весит Galaxy Tab S11?',
+                    options: ['380 г', '420 г', '450 г', '510 г'],
+                    correct: 2
+                }
+            },
+            {
+                id: 'taba11plus',
+                category: 'tablets',
+                name: 'Galaxy Tab A11+',
+                icon: '📱',
+                tagline: 'Большой экран для всей семьи',
+                fab: [
+                    {
+                        icon: '👨‍👩‍👧‍👦',
+                        feature: 'Samsung Kids + родительский контроль',
+                        advantage: 'Безопасная среда для детей',
+                        benefit: 'Дети учатся и играют, вы спокойны за контент'
+                    },
+                    {
+                        icon: '📺',
+                        feature: '11.5" LCD экран с TÜV-сертификацией',
+                        advantage: 'Защита глаз при долгом использовании',
+                        benefit: 'Смотрите видео часами без усталости глаз'
+                    },
+                    {
+                        icon: '🔊',
+                        feature: 'Стерео динамики с Dolby Atmos',
+                        advantage: 'Качественный звук для контента',
+                        benefit: 'Фильмы, музыка, игры — звучат отлично'
+                    }
+                ],
+                specs: {
+                    screen: '11.5" WUXGA LCD, 90 Гц',
+                    cpu: 'Helio G99',
+                    battery: '7040 мАч / 15 Вт',
+                    camera: '8 МП / 5 МП фронт',
+                    memory: '4/8 ГБ / 64-128 ГБ + microSD',
+                    protection: 'Нет',
+                    dimensions: '270×175×7.9 мм, 520 г'
+                },
+                quiz: {
+                    question: 'Какой процессор в Tab A11+?',
+                    options: ['Snapdragon 680', 'Helio G99', 'Exynos 1380', 'Dimensity 700'],
+                    correct: 1
+                }
+            },
+            {
+                id: 'taba11',
+                category: 'tablets',
+                name: 'Galaxy Tab A11',
+                icon: '📱',
+                tagline: 'Компактный планшет для повседневных задач',
+                fab: [
+                    {
+                        icon: '💰',
+                        feature: 'Цена от 14 990 ₽',
+                        advantage: 'Доступный планшет Samsung',
+                        benefit: 'Качество Galaxy по цене бюджетных брендов'
+                    },
+                    {
+                        icon: '📚',
+                        feature: '10.4" экран + многозадачность',
+                        advantage: 'Удобный размер для учёбы',
+                        benefit: 'Читайте учебники, делайте заметки, смотрите лекции'
+                    },
+                    {
+                        icon: '🔋',
+                        feature: '6400 мАч батарея',
+                        advantage: 'До 12 часов использования',
+                        benefit: 'Хватит на весь учебный день без подзарядки'
+                    }
+                ],
+                specs: {
+                    screen: '10.4" WUXGA LCD, 60 Гц',
+                    cpu: 'Helio G80',
+                    battery: '6400 мАч / 15 Вт',
+                    camera: '8 МП / 5 МП фронт',
+                    memory: '4 ГБ / 64-128 ГБ + microSD',
+                    protection: 'Нет',
+                    dimensions: '247×156×8.6 мм, 465 г'
+                },
+                quiz: {
+                    question: 'Какая диагональ экрана у Tab A11?',
+                    options: ['8.7"', '10.4"', '11"', '10.1"'],
+                    correct: 1
+                }
+            },
+            {
+                id: 'tabs10lite',
+                category: 'tablets',
+                name: 'Galaxy Tab S10 Lite',
+                icon: '📱',
+                tagline: 'S Pen в комплекте по доступной цене',
+                fab: [
+                    {
+                        icon: '✏️',
+                        feature: 'S Pen в комплекте',
+                        advantage: 'Рисование и заметки без доплаты',
+                        benefit: 'Творите и учитесь — стилус уже в коробке'
+                    },
+                    {
+                        icon: '🖥️',
+                        feature: '10.4" AMOLED экран',
+                        advantage: 'Яркие цвета и глубокий чёрный',
+                        benefit: 'Комфортный просмотр видео и работа с документами'
+                    },
+                    {
+                        icon: '🎓',
+                        feature: 'Samsung Notes + AI-конспект',
+                        advantage: 'Умные заметки с распознаванием',
+                        benefit: 'Пишите от руки — AI превратит в текст'
+                    }
+                ],
+                specs: {
+                    screen: '10.4" WUXGA+ AMOLED, 60 Гц',
+                    cpu: 'Snapdragon 778G',
+                    battery: '7040 мАч / 25 Вт',
+                    camera: '8 МП / 5 МП фронт',
+                    memory: '6/8 ГБ / 64-128 ГБ',
+                    protection: 'Нет',
+                    dimensions: '248×157×6.8 мм, 467 г'
+                },
+                quiz: {
+                    question: 'Что идёт в комплекте с Tab S10 Lite?',
+                    options: ['Клавиатура', 'S Pen', 'Чехол', 'Наушники'],
+                    correct: 1
+                }
+            },
+            {
+                id: 'tabs10fe',
+                category: 'tablets',
+                name: 'Galaxy Tab S10 FE',
+                icon: '📱',
+                tagline: 'Флагманские функции в среднем сегменте',
+                fab: [
+                    {
+                        icon: '🧠',
+                        feature: 'Galaxy AI для планшетов',
+                        advantage: 'AI-перевод, суммаризация, помощник',
+                        benefit: 'Работайте с документами умнее — AI ускоряет рутину'
+                    },
+                    {
+                        icon: '🖥️',
+                        feature: '12.4" AMOLED 120 Гц',
+                        advantage: 'Большой плавный экран',
+                        benefit: 'Удобно для многозадачности и мультимедиа'
+                    },
+                    {
+                        icon: '⚡',
+                        feature: 'Exynos 1480 + 8 ГБ ОЗУ',
+                        advantage: 'Производительность для работы',
+                        benefit: 'Открывайте много приложений — планшет не тормозит'
+                    }
+                ],
+                specs: {
+                    screen: '12.4" WQXGA AMOLED, 120 Гц, 1800 нит',
+                    cpu: 'Exynos 1480 (4 нм)',
+                    battery: '9800 мАч / 45 Вт',
+                    camera: '13 МП / 12 МП фронт',
+                    memory: '8/12 ГБ / 128-256 ГБ',
+                    protection: 'IP68',
+                    dimensions: '285×186×6.1 мм, 530 г'
+                },
+                quiz: {
+                    question: 'Какая частота обновления экрана у Tab S10 FE?',
+                    options: ['60 Гц', '90 Гц', '120 Гц', '144 Гц'],
+                    correct: 2
+                }
+            },
+
+            // ===== WEARABLES =====
+            {
+                id: 'watch8',
+                category: 'wearables',
+                name: 'Galaxy Watch 8',
+                icon: '⌚',
+                tagline: 'Умные часы с революционным экраном',
+                fab: [
+                    {
+                        icon: '☀️',
+                        feature: 'Дисплей 3000 нит',
+                        advantage: 'Самый яркий экран среди смарт-часов',
+                        benefit: 'Отлично видно даже под прямым солнцем'
+                    },
+                    {
+                        icon: '❤️',
+                        feature: 'BioActive 2.0 + AGEs-индекс',
+                        advantage: 'Расширенный мониторинг здоровья',
+                        benefit: 'Следите за биологическим возрастом и метаболизмом'
+                    },
+                    {
+                        icon: '🔋',
+                        feature: '40 часов автономности',
+                        advantage: 'На 30% дольше прошлой модели',
+                        benefit: 'Заряжайте раз в два дня, а не каждый вечер'
+                    }
+                ],
+                specs: {
+                    screen: '1.5" Super AMOLED, 480×480, 3000 нит',
+                    cpu: 'Exynos W1000 (3 нм)',
+                    battery: '425 мАч / 40 часов',
+                    camera: '—',
+                    memory: '2 ГБ / 32 ГБ',
+                    protection: 'IP68, 5ATM, MIL-STD-810H',
+                    dimensions: '45.5×45.5×10.9 мм, 33 г'
+                },
+                quiz: {
+                    question: 'Какая пиковая яркость экрана у Watch 8?',
+                    options: ['1000 нит', '2000 нит', '2500 нит', '3000 нит'],
+                    correct: 3
+                }
+            },
+            {
+                id: 'watch8classic',
+                category: 'wearables',
+                name: 'Galaxy Watch 8 Classic',
+                icon: '⌚',
+                tagline: 'Премиальные часы с вращающимся безелем',
+                fab: [
+                    {
+                        icon: '⚙️',
+                        feature: 'Физический вращающийся безель',
+                        advantage: 'Тактильное управление без касания экрана',
+                        benefit: 'Листайте уведомления одним пальцем, даже в перчатках'
+                    },
+                    {
+                        icon: '🏛️',
+                        feature: 'Корпус из нержавеющей стали',
+                        advantage: 'Премиальный внешний вид и долговечность',
+                        benefit: 'Часы выглядят как классические и прослужат годы'
+                    },
+                    {
+                        icon: '📍',
+                        feature: 'Dual-GPS + офлайн-карты',
+                        advantage: 'Точная навигация без телефона',
+                        benefit: 'Бегайте и путешествуйте без смартфона'
+                    }
+                ],
+                specs: {
+                    screen: '1.5" Super AMOLED, 480×480, 3000 нит',
+                    cpu: 'Exynos W1000 (3 нм)',
+                    battery: '425 мАч / 38 часов',
+                    camera: '—',
+                    memory: '2 ГБ / 32 ГБ',
+                    protection: 'IP68, 5ATM, MIL-STD-810H',
+                    dimensions: '47×47×11.5 мм, 52 г (сталь)'
+                },
+                quiz: {
+                    question: 'Из чего сделан корпус Watch 8 Classic?',
+                    options: ['Алюминий', 'Титан', 'Нержавеющая сталь', 'Керамика'],
+                    correct: 2
+                }
+            },
+            {
+                id: 'budscore',
+                category: 'wearables',
+                name: 'Galaxy Buds Core',
+                icon: '🎧',
+                tagline: 'Качественный звук по доступной цене',
+                fab: [
+                    {
+                        icon: '🎵',
+                        feature: 'Драйверы 12 мм с тюнингом AKG',
+                        advantage: 'Насыщенный сбалансированный звук',
+                        benefit: 'Музыка звучит как задумывал артист'
+                    },
+                    {
+                        icon: '🔋',
+                        feature: '7 часов + 21 час в кейсе',
+                        advantage: 'Долгая автономность без ANC',
+                        benefit: 'Слушайте весь день, заряжайте на ночь'
+                    },
+                    {
+                        icon: '📞',
+                        feature: '2 микрофона с ИИ-шумоподавлением',
+                        advantage: 'Чистая речь при звонках',
+                        benefit: 'Вас хорошо слышно даже на шумной улице'
+                    }
+                ],
+                specs: {
+                    screen: '—',
+                    cpu: '—',
+                    battery: '7ч + 21ч (кейс)',
+                    camera: '—',
+                    memory: '—',
+                    protection: 'IPX4',
+                    dimensions: '5.5 г (наушник), 38 г (кейс)'
+                },
+                quiz: {
+                    question: 'Какой размер драйверов в Buds Core?',
+                    options: ['8 мм', '10 мм', '12 мм', '14 мм'],
+                    correct: 2
+                }
+            },
+            {
+                id: 'buds3fe',
+                category: 'wearables',
+                name: 'Galaxy Buds3 FE',
+                icon: '🎧',
+                tagline: 'Шумоподавление в доступном формате',
+                fab: [
+                    {
+                        icon: '🔇',
+                        feature: 'Адаптивный ANC',
+                        advantage: 'Шумоподавление подстраивается под окружение',
+                        benefit: 'Тишина в метро, прозрачность на улице — автоматически'
+                    },
+                    {
+                        icon: '🎧',
+                        feature: '360 Audio с отслеживанием головы',
+                        advantage: 'Объёмный звук как в кинотеатре',
+                        benefit: 'Фильмы и игры звучат вокруг вас'
+                    },
+                    {
+                        icon: '💬',
+                        feature: 'Живой перевод с Galaxy AI',
+                        advantage: 'Перевод разговора в реальном времени',
+                        benefit: 'Общайтесь с иностранцами без знания языка'
+                    }
+                ],
+                specs: {
+                    screen: '—',
+                    cpu: '—',
+                    battery: '6.5ч (ANC) + 19ч (кейс)',
+                    camera: '—',
+                    memory: '—',
+                    protection: 'IP57',
+                    dimensions: '5.1 г (наушник), 42 г (кейс)'
+                },
+                quiz: {
+                    question: 'Какая функция AI есть в Buds3 FE?',
+                    options: ['AI-эквалайзер', 'Живой перевод', 'AI-микширование', 'AI-запись'],
+                    correct: 1
+                }
+            }
+        ]
     };
 
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-
-    // ===== УТИЛИТЫ =====
-    function showScreen(id) {
-        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
-        document.getElementById(id).classList.remove('hidden');
-    }
-
-    function save() {
-        localStorage.setItem('galaxyJump', JSON.stringify({
-            completed: G.completed,
-            totalStars: G.totalStars,
-            totalCoins: G.totalCoins,
-            level: G.level
-        }));
-    }
-
-    function load() {
-        const data = JSON.parse(localStorage.getItem('galaxyJump') || '{}');
-        G.completed = data.completed || [];
-        G.totalStars = data.totalStars || 0;
-        G.totalCoins = data.totalCoins || 0;
-        G.level = data.level || 0;
-        updateStats();
-    }
-
-    function updateStats() {
-        document.getElementById('statLevels').textContent = G.completed.length;
-        document.getElementById('statStars').textContent = G.totalStars;
-        document.getElementById('statCoins').textContent = G.totalCoins;
-    }
-
-    // ===== МЕНЮ =====
-    function showMenu() {
-        stopGame();
-        updateStats();
-        showScreen('menuScreen');
-    }
-
-    function showLevels() {
-        const grid = document.getElementById('levelsGrid');
-        grid.innerHTML = '';
-        
-        DEVICES.forEach((dev, i) => {
-            const completed = G.completed.includes(i);
-            const available = i === 0 || G.completed.includes(i - 1) || completed;
-            
-            const btn = document.createElement('button');
-            btn.className = `level-btn ${completed ? 'completed' : available ? 'available' : 'locked'}`;
-            btn.innerHTML = `
-                <span>${i + 1}</span>
-                <span class="stars">${completed ? '⭐⭐⭐' : '☆☆☆'}</span>
-            `;
-            
-            if (available) {
-                btn.onclick = () => { G.level = i; startGame(); };
-            }
-            
-            grid.appendChild(btn);
-        });
-        
-        showScreen('levelsScreen');
-    }
-
-    function playGame() {
-        // Найти первый непройденный уровень
-        for (let i = 0; i < DEVICES.length; i++) {
-            if (!G.completed.includes(i)) {
-                G.level = i;
-                break;
-            }
-        }
-        startGame();
-    }
-
-    // ===== ИГРА =====
-    function startGame() {
-        showScreen('gameScreen');
-        resizeCanvas();
-        initLevel();
-        G.gameLoop = requestAnimationFrame(gameLoop);
-    }
-
-    function stopGame() {
-        if (G.gameLoop) {
-            cancelAnimationFrame(G.gameLoop);
-            G.gameLoop = null;
-        }
-        hideLearnPopup();
-    }
-
-    function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-
-    function initLevel() {
-        const dev = DEVICES[G.level];
-        
-        // Сброс состояния
-        G.px = canvas.width / 2;
-        G.py = canvas.height - 100;
-        G.vx = 0;
-        G.vy = 0;
-        G.cameraY = 0;
-        G.platforms = [];
-        G.stars = [];
-        G.coins = [];
-        G.collectedStars = [];
-        G.levelCoins = 0;
-        G.gameOver = false;
-        G.reachedFinish = false;
-
-        // Высота уровня
-        const levelHeight = 3000;
-        G.finishY = -levelHeight + 200;
-
-        // Стартовая платформа
-        G.platforms.push({
-            x: canvas.width / 2 - 60,
-            y: canvas.height - 50,
-            w: 120
-        });
-
-        // Генерация платформ
-        let y = canvas.height - 150;
-        while (y > G.finishY) {
-            const x = Math.random() * (canvas.width - 100) + 20;
-            const w = 60 + Math.random() * 40;
-            G.platforms.push({ x, y, w });
-            y -= 80 + Math.random() * 40;
-        }
-
-        // Звёзды (3 штуки - по одной на каждую фишку)
-        const starPositions = [
-            canvas.height - 600,
-            canvas.height - 1400,
-            canvas.height - 2200
-        ];
-        
-        dev.f.forEach((feature, i) => {
-            const plat = G.platforms.find(p => Math.abs(p.y - starPositions[i]) < 100) || G.platforms[5 + i * 8];
-            if (plat) {
-                G.stars.push({
-                    x: plat.x + plat.w / 2,
-                    y: plat.y - 50,
-                    idx: i,
-                    collected: false
-                });
-            }
-        });
-
-        // Монеты
-        G.platforms.forEach((p, i) => {
-            if (i > 0 && Math.random() > 0.5) {
-                G.coins.push({
-                    x: p.x + p.w / 2,
-                    y: p.y - 40,
-                    collected: false
-                });
-            }
-        });
-
-        // HUD
-        document.getElementById('hudStars').textContent = '0/3';
-        document.getElementById('hudCoins').textContent = '0';
-    }
-
-    function gameLoop() {
-        if (G.gameOver) return;
-        
-        update();
-        render();
-        G.gameLoop = requestAnimationFrame(gameLoop);
-    }
-
-    function update() {
-        const gravity = 0.35;
-        const speed = 6;
-        const jumpForce = -12;
-
-        // Движение влево/вправо
-        if (G.moveLeft) {
-            G.vx = -speed;
-        } else if (G.moveRight) {
-            G.vx = speed;
-        } else {
-            G.vx *= 0.9;
-        }
-
-        // Гравитация
-        G.vy += gravity;
-
-        // Позиция
-        G.px += G.vx;
-        G.py += G.vy;
-
-        // Границы экрана (wrap)
-        if (G.px < -20) G.px = canvas.width + 20;
-        if (G.px > canvas.width + 20) G.px = -20;
-
-        // Коллизия с платформами (только при падении)
-        if (G.vy > 0) {
-            G.platforms.forEach(p => {
-                const relY = p.y - G.cameraY;
-                if (G.px > p.x - 10 && G.px < p.x + p.w + 10) {
-                    if (G.py > relY - 30 && G.py < relY + 10) {
-                        G.py = relY - 30;
-                        G.vy = jumpForce;
-                    }
-                }
-            });
-        }
-
-        // Сбор звёзд
-        G.stars.forEach(s => {
-            if (s.collected) return;
-            const relY = s.y - G.cameraY;
-            const dx = G.px - s.x;
-            const dy = G.py - relY;
-            if (Math.sqrt(dx * dx + dy * dy) < 40) {
-                s.collected = true;
-                G.collectedStars.push(s.idx);
-                document.getElementById('hudStars').textContent = `${G.collectedStars.length}/3`;
-                showLearnPopup(s.idx);
-            }
-        });
-
-        // Сбор монет
-        G.coins.forEach(c => {
-            if (c.collected) return;
-            const relY = c.y - G.cameraY;
-            const dx = G.px - c.x;
-            const dy = G.py - relY;
-            if (Math.sqrt(dx * dx + dy * dy) < 30) {
-                c.collected = true;
-                G.levelCoins++;
-                document.getElementById('hudCoins').textContent = G.levelCoins;
-            }
-        });
-
-        // Камера следует за игроком вверх
-        const targetCameraY = Math.min(0, G.py - canvas.height / 2 + G.cameraY);
-        if (G.py < canvas.height / 2) {
-            G.cameraY += (G.py - canvas.height / 2) * 0.1;
-        }
-
-        // Проверка финиша
-        if (G.cameraY < G.finishY + canvas.height && !G.reachedFinish) {
-            if (G.collectedStars.length === 3) {
-                G.reachedFinish = true;
-                G.gameOver = true;
-                setTimeout(() => showTest(), 500);
-            }
-        }
-
-        // Падение вниз = проигрыш
-        if (G.py > canvas.height + 100) {
-            G.gameOver = true;
-            showResult(false, 'Вы упали! Попробуйте снова.');
-        }
-    }
-
-    function render() {
-        // Фон - градиент
-        const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-        grad.addColorStop(0, '#0f0c29');
-        grad.addColorStop(0.5, '#302b63');
-        grad.addColorStop(1, '#24243e');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // Звёзды на фоне
-        ctx.fillStyle = 'rgba(255,255,255,0.3)';
-        for (let i = 0; i < 50; i++) {
-            const x = (i * 73) % canvas.width;
-            const y = ((i * 137 - G.cameraY * 0.3) % (canvas.height + 200)) - 100;
-            ctx.beginPath();
-            ctx.arc(x, y, 1 + (i % 2), 0, Math.PI * 2);
-            ctx.fill();
-        }
-
-        // Платформы
-        G.platforms.forEach(p => {
-            const y = p.y - G.cameraY;
-            if (y < -50 || y > canvas.height + 50) return;
-            
-            // Градиент платформы
-            const platGrad = ctx.createLinearGradient(p.x, y, p.x, y + 15);
-            platGrad.addColorStop(0, '#667eea');
-            platGrad.addColorStop(1, '#764ba2');
-            
-            ctx.fillStyle = platGrad;
-            ctx.beginPath();
-            ctx.roundRect(p.x, y, p.w, 15, 8);
-            ctx.fill();
-            
-            // Свечение
-            ctx.shadowColor = '#667eea';
-            ctx.shadowBlur = 10;
-            ctx.fill();
-            ctx.shadowBlur = 0;
-        });
-
-        // Монеты
-        G.coins.forEach(c => {
-            if (c.collected) return;
-            const y = c.y - G.cameraY;
-            if (y < -50 || y > canvas.height + 50) return;
-            
-            ctx.fillStyle = '#ffd700';
-            ctx.beginPath();
-            ctx.arc(c.x, y, 12, 0, Math.PI * 2);
-            ctx.fill();
-            
-            ctx.fillStyle = '#ffec8b';
-            ctx.beginPath();
-            ctx.arc(c.x - 3, y - 3, 4, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        // Звёзды (collectibles)
-        G.stars.forEach(s => {
-            if (s.collected) return;
-            const y = s.y - G.cameraY;
-            if (y < -50 || y > canvas.height + 50) return;
-            
-            drawStar(s.x, y, 20, '#ffd700', '#ff6b6b');
-        });
-
-        // Финишная линия
-        const finishScreenY = G.finishY - G.cameraY;
-        if (finishScreenY > -100 && finishScreenY < canvas.height + 100) {
-            ctx.fillStyle = G.collectedStars.length === 3 ? '#38ef7d' : '#ff6b6b';
-            ctx.fillRect(0, finishScreenY, canvas.width, 5);
-            
-            ctx.fillStyle = '#fff';
-            ctx.font = 'bold 16px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText(G.collectedStars.length === 3 ? '🏁 ФИНИШ' : '⭐ Собери все звёзды!', canvas.width / 2, finishScreenY - 15);
-        }
-
-        // Персонаж
-        drawPlayer(G.px, G.py);
-    }
-
-    function drawStar(x, y, size, color1, color2) {
-        ctx.save();
-        ctx.translate(x, y);
-        
-        // Свечение
-        ctx.shadowColor = color1;
-        ctx.shadowBlur = 15;
-        
-        ctx.fillStyle = color1;
-        ctx.beginPath();
-        for (let i = 0; i < 5; i++) {
-            const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
-            const r = i === 0 ? size : size;
-            ctx.lineTo(Math.cos(angle) * r, Math.sin(angle) * r);
-            
-            const angle2 = angle + (2 * Math.PI) / 10;
-            ctx.lineTo(Math.cos(angle2) * (size * 0.4), Math.sin(angle2) * (size * 0.4));
-        }
-        ctx.closePath();
-        ctx.fill();
-        
-        ctx.shadowBlur = 0;
-        ctx.restore();
-    }
-
-    function drawPlayer(x, y) {
-        ctx.save();
-        ctx.translate(x, y);
-
-        // Тело - круг с градиентом
-        const bodyGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 25);
-        bodyGrad.addColorStop(0, '#667eea');
-        bodyGrad.addColorStop(1, '#764ba2');
-        
-        ctx.fillStyle = bodyGrad;
-        ctx.beginPath();
-        ctx.arc(0, 0, 25, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Samsung надпись
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 8px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('SAMSUNG', 0, 3);
-
-        // Глаза
-        ctx.fillStyle = '#fff';
-        ctx.beginPath();
-        ctx.arc(-8, -8, 6, 0, Math.PI * 2);
-        ctx.arc(8, -8, 6, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#333';
-        ctx.beginPath();
-        ctx.arc(-6, -8, 3, 0, Math.PI * 2);
-        ctx.arc(10, -8, 3, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Улыбка
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(0, 0, 12, 0.2, Math.PI - 0.2);
-        ctx.stroke();
-
-        ctx.restore();
-    }
-
-    // ===== ОБУЧЕНИЕ =====
-    function showLearnPopup(idx) {
-        const dev = DEVICES[G.level];
-        document.getElementById('learnTitle').textContent = dev.f[idx];
-        document.getElementById('learnText').textContent = dev.d[idx];
-        document.getElementById('learnPopup').classList.add('show');
-        
-        setTimeout(hideLearnPopup, 3000);
-    }
-
-    function hideLearnPopup() {
-        document.getElementById('learnPopup').classList.remove('show');
-    }
-
-    // ===== ТЕСТ =====
-    function showTest() {
-        stopGame();
-        
-        const dev = DEVICES[G.level];
-        document.getElementById('testTitle').textContent = `🏆 ТЕСТ: ${dev.name}`;
-        document.getElementById('testSubtitle').textContent = 'Выбери 3 главные фишки этого устройства:';
-        
-        // Собираем все фишки
-        const allFeatures = new Set();
-        DEVICES.forEach(d => d.f.forEach(f => allFeatures.add(f)));
-        
-        const correct = dev.f;
-        const wrong = [...allFeatures].filter(f => !correct.includes(f));
-        const shuffledWrong = wrong.sort(() => Math.random() - 0.5).slice(0, 3);
-        const options = [...correct, ...shuffledWrong].sort(() => Math.random() - 0.5);
-
-        const optionsDiv = document.getElementById('testOptions');
-        optionsDiv.innerHTML = '';
-        
-        options.forEach(opt => {
-            const btn = document.createElement('button');
-            btn.className = 'test-option';
-            btn.textContent = opt;
-            btn.dataset.feature = opt;
-            btn.onclick = function() {
-                const selected = document.querySelectorAll('.test-option.selected');
-                if (this.classList.contains('selected')) {
-                    this.classList.remove('selected');
-                } else if (selected.length < 3) {
-                    this.classList.add('selected');
-                }
-            };
-            optionsDiv.appendChild(btn);
-        });
-
-        showScreen('testScreen');
-    }
-
-    function checkTest() {
-        const dev = DEVICES[G.level];
-        const options = document.querySelectorAll('.test-option');
-        const selected = [...document.querySelectorAll('.test-option.selected')].map(b => b.dataset.feature);
-        
-        let correctCount = 0;
-        
-        options.forEach(btn => {
-            btn.onclick = null;
-            const f = btn.dataset.feature;
-            const isCorrect = dev.f.includes(f);
-            const isSelected = selected.includes(f);
-            
-            if (isCorrect) {
-                btn.classList.add('correct');
-                if (isSelected) correctCount++;
-            } else if (isSelected) {
-                btn.classList.add('wrong');
-            }
-        });
-
-        setTimeout(() => {
-            if (correctCount === 3) {
-                // Успех
-                if (!G.completed.includes(G.level)) {
-                    G.completed.push(G.level);
-                    G.totalStars += 3;
-                }
-                G.totalCoins += G.levelCoins;
-                save();
-                showResult(true, `Вы изучили ${dev.name}!`);
-            } else {
-                showResult(false, `Правильно: ${correctCount}/3. Попробуйте ещё раз!`);
-            }
-        }, 1500);
-    }
-
-    // ===== РЕЗУЛЬТАТ =====
-    function showResult(success, text) {
-        document.getElementById('resultIcon').textContent = success ? '🎉' : '😔';
-        document.getElementById('resultTitle').textContent = success ? 'УРОВЕНЬ ПРОЙДЕН!' : 'НЕ ПОЛУЧИЛОСЬ';
-        document.getElementById('resultText').textContent = text;
-        
-        showScreen('resultScreen');
-    }
-
-    function nextLevel() {
-        G.level++;
-        if (G.level >= DEVICES.length) {
-            G.level = 0;
-        }
-        startGame();
-    }
-
-    // ===== УПРАВЛЕНИЕ =====
-    // Клавиатура
-    document.addEventListener('keydown', e => {
-        if (e.code === 'ArrowLeft' || e.code === 'KeyA') G.moveLeft = true;
-        if (e.code === 'ArrowRight' || e.code === 'KeyD') G.moveRight = true;
-    });
-
-    document.addEventListener('keyup', e => {
-        if (e.code === 'ArrowLeft' || e.code === 'KeyA') G.moveLeft = false;
-        if (e.code === 'ArrowRight' || e.code === 'KeyD') G.moveRight = false;
-    });
-
-    // Тач
-    const ctrlLeft = document.getElementById('ctrlLeft');
-    const ctrlRight = document.getElementById('ctrlRight');
-
-    function setupControl(el, key) {
-        const start = () => { G[key] = true; };
-        const end = () => { G[key] = false; };
-        
-        el.addEventListener('mousedown', start);
-        el.addEventListener('touchstart', e => { e.preventDefault(); start(); });
-        el.addEventListener('mouseup', end);
-        el.addEventListener('mouseleave', end);
-        el.addEventListener('touchend', end);
-        el.addEventListener('touchcancel', end);
-    }
-
-    setupControl(ctrlLeft, 'moveLeft');
-    setupControl(ctrlRight, 'moveRight');
-
-    // Resize
-    window.addEventListener('resize', resizeCanvas);
+    // ===== STATE =====
+    let currentDevice = null;
+    let completedQuizzes = JSON.parse(localStorage.getItem('completedQuizzes') || '[]');
 
     // ===== INIT =====
-    load();
+    function init() {
+        renderSidebar();
+        updateProgress();
+        document.getElementById('totalDevices').textContent = DATA.devices.length;
+        document.getElementById('learnedCount').textContent = completedQuizzes.length;
+    }
+
+    // ===== SIDEBAR =====
+    function renderSidebar() {
+        const nav = document.getElementById('sidebarNav');
+        nav.innerHTML = '';
+
+        DATA.categories.forEach(cat => {
+            const devices = DATA.devices.filter(d => d.category === cat.id);
+            if (devices.length === 0) return;
+
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'nav-category';
+            categoryDiv.innerHTML = `<div class="nav-category-title">${cat.icon} ${cat.name}</div>`;
+
+            devices.forEach(device => {
+                const completed = completedQuizzes.includes(device.id);
+                const item = document.createElement('div');
+                item.className = `nav-item ${currentDevice?.id === device.id ? 'active' : ''}`;
+                item.innerHTML = `
+                    <span class="nav-item-icon">${device.icon}</span>
+                    <span>${device.name}</span>
+                    ${completed ? '<span class="nav-item-badge">✓</span>' : ''}
+                `;
+                item.onclick = () => selectDevice(device.id);
+                categoryDiv.appendChild(item);
+            });
+
+            nav.appendChild(categoryDiv);
+        });
+    }
+
+    // ===== SELECT DEVICE =====
+    function selectDevice(deviceId) {
+        currentDevice = DATA.devices.find(d => d.id === deviceId);
+        if (!currentDevice) return;
+
+        renderDevice();
+        renderSidebar();
+        closeSidebar();
+    }
+
+    // ===== RENDER DEVICE =====
+    function renderDevice() {
+        const device = currentDevice;
+        const category = DATA.categories.find(c => c.id === device.category);
+
+        const main = document.getElementById('mainContent');
+        main.innerHTML = `
+            <!-- Header -->
+            <div class="device-header">
+                <div class="device-category">${category.icon} ${category.name}</div>
+                <div class="device-title">
+                    <span class="device-title-icon">${device.icon}</span>
+                    ${device.name}
+                </div>
+                <div class="device-tagline">${device.tagline}</div>
+            </div>
+
+            <!-- FAB Section -->
+            <div class="section-title">Ключевые фишки (ХПВ)</div>
+            <div class="fab-grid">
+                ${device.fab.map((fab, i) => `
+                    <div class="fab-card">
+                        <div class="fab-icon">${fab.icon}</div>
+                        <div>
+                            <span class="fab-label feature">Характеристика</span>
+                            <div class="fab-title">${fab.feature}</div>
+                        </div>
+                        <div style="margin-top:12px">
+                            <span class="fab-label advantage">Преимущество</span>
+                            <div class="fab-text">${fab.advantage}</div>
+                        </div>
+                        <div style="margin-top:12px">
+                            <span class="fab-label benefit">Выгода для клиента</span>
+                            <div class="fab-text">${fab.benefit}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+
+            <!-- Specs Section -->
+            <div class="specs-section">
+                <div class="section-title">Технические характеристики</div>
+                <div class="specs-table">
+                    <div class="specs-row">
+                        <div class="specs-label"><span class="specs-label-icon">📺</span> Экран</div>
+                        <div class="specs-value">${device.specs.screen}</div>
+                    </div>
+                    <div class="specs-row">
+                        <div class="specs-label"><span class="specs-label-icon">⚡</span> Процессор</div>
+                        <div class="specs-value">${device.specs.cpu}</div>
+                    </div>
+                    <div class="specs-row">
+                        <div class="specs-label"><span class="specs-label-icon">🔋</span> Батарея</div>
+                        <div class="specs-value">${device.specs.battery}</div>
+                    </div>
+                    ${device.specs.camera !== '—' ? `
+                    <div class="specs-row">
+                        <div class="specs-label"><span class="specs-label-icon">📷</span> Камеры</div>
+                        <div class="specs-value">${device.specs.camera}</div>
+                    </div>
+                    ` : ''}
+                    ${device.specs.memory !== '—' ? `
+                    <div class="specs-row">
+                        <div class="specs-label"><span class="specs-label-icon">💾</span> Память</div>
+                        <div class="specs-value">${device.specs.memory}</div>
+                    </div>
+                    ` : ''}
+                    <div class="specs-row">
+                        <div class="specs-label"><span class="specs-label-icon">🛡️</span> Защита</div>
+                        <div class="specs-value">${device.specs.protection}</div>
+                    </div>
+                    <div class="specs-row">
+                        <div class="specs-label"><span class="specs-label-icon">📐</span> Размеры</div>
+                        <div class="specs-value">${device.specs.dimensions}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div class="quiz-section">
+                <div class="quiz-title">🎯 Проверь себя</div>
+                <div class="quiz-question">${device.quiz.question}</div>
+                <div class="quiz-options" id="quizOptions">
+                    ${device.quiz.options.map((opt, i) => `
+                        <div class="quiz-option" data-index="${i}" onclick="selectAnswer(${i})">${opt}</div>
+                    `).join('')}
+                </div>
+                <div class="quiz-feedback" id="quizFeedback"></div>
+                <button class="quiz-retry" id="quizRetry" onclick="resetQuiz()">Попробовать снова</button>
+            </div>
+        `;
+    }
+
+    // ===== QUIZ =====
+    let selectedAnswer = null;
+
+    function selectAnswer(index) {
+        if (selectedAnswer !== null) return;
+        
+        selectedAnswer = index;
+        const options = document.querySelectorAll('.quiz-option');
+        const feedback = document.getElementById('quizFeedback');
+        const retryBtn = document.getElementById('quizRetry');
+        const correctIndex = currentDevice.quiz.correct;
+
+        options.forEach((opt, i) => {
+            opt.classList.add('disabled');
+            if (i === correctIndex) {
+                opt.classList.add('correct');
+            } else if (i === index && index !== correctIndex) {
+                opt.classList.add('incorrect');
+            }
+        });
+
+        if (index === correctIndex) {
+            feedback.textContent = '✅ Правильно! Отличная работа!';
+            feedback.className = 'quiz-feedback show correct';
+            
+            if (!completedQuizzes.includes(currentDevice.id)) {
+                completedQuizzes.push(currentDevice.id);
+                localStorage.setItem('completedQuizzes', JSON.stringify(completedQuizzes));
+                updateProgress();
+                renderSidebar();
+                document.getElementById('learnedCount').textContent = completedQuizzes.length;
+            }
+        } else {
+            feedback.textContent = '❌ Неверно. Правильный ответ выделен зелёным.';
+            feedback.className = 'quiz-feedback show incorrect';
+            retryBtn.classList.add('show');
+        }
+    }
+
+    function resetQuiz() {
+        selectedAnswer = null;
+        renderDevice();
+    }
+
+    // ===== PROGRESS =====
+    function updateProgress() {
+        const total = DATA.devices.length;
+        const completed = completedQuizzes.length;
+        const percent = Math.round((completed / total) * 100);
+        
+        document.getElementById('progressText').textContent = `${percent}%`;
+        document.getElementById('progressFill').style.width = `${percent}%`;
+    }
+
+    // ===== MOBILE =====
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+    }
+
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('show');
+    }
+
+    // ===== START =====
+    init();
     </script>
 </body>
 </html>
